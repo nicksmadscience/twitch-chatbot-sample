@@ -6,12 +6,13 @@ import thread
 import json
 import pprint
 import traceback
+from threading import Thread
 
 with open("secrets.json") as secrets_file:
     secrets = json.loads(secrets_file.read())
 
 
-# {"type":"MESSAGE","data":{"topic":"channel-bits-events-v1.105293178","message":"{\"data\":{\"user_name\":\"theotherlonestar\",\"channel_name\":\"nicksmadscience\",\"user_id\":\"85403751\",\"channel_id\":\"105293178\",\"time\":\"2020-07-08T17:59:58.014403227Z\",\"chat_message\":\"Cheer1\",\"bits_used\":1,\"total_bits_used\":1,\"context\":\"cheer\",\"badge_entitlement\":{\"new_version\":0,\"previous_version\":0},\"badge_tier_entitlement\":{\"Badge\":{\"new_version\":0,\"previous_version\":0},\"Emoticons\":null}},\"version\":\"1.0\",\"message_type\":\"bits_event\",\"message_id\":\"da62dd7c-957a-5433-b14d-42fb0773e45b\"}"}}
+# {"type":"MESSAGE","data":{"topic":"channel-bits-events-v1.105293178","message":"{\"data\":{\"user_name\":\"theotherlonestar\",\"channel_name\":\"nicksmadscience\",\"user_id\":\"85403751\",\"secrets["id"]\":\"105293178\",\"time\":\"2020-07-08T17:59:58.014403227Z\",\"chat_message\":\"Cheer1\",\"bits_used\":1,\"total_bits_used\":1,\"context\":\"cheer\",\"badge_entitlement\":{\"new_version\":0,\"previous_version\":0},\"badge_tier_entitlement\":{\"Badge\":{\"new_version\":0,\"previous_version\":0},\"Emoticons\":null}},\"version\":\"1.0\",\"message_type\":\"bits_event\",\"message_id\":\"da62dd7c-957a-5433-b14d-42fb0773e45b\"}"}}
 
 # print ("id: " + secrets["id"])
 # print ("key: " + secrets["key"])
@@ -24,61 +25,41 @@ relayCardSerial = '/dev/ttyACM0'
 #Open port for communication    
 serPort = serial.Serial(relayCardSerial, 9600, timeout=1)
 
-
+# SETUP
 serPort.write("gpio set 5\r") # turn off the yellow strobe
+serPort.write("gpio set 6\r") # turn off the green strobe
 
 
 
-# ws = create_c onnection("wss://pubsub-edge.twitch.tv")
-
-# for i in range(0, 10):
-# 	serPort.write("gpio writeall ffffffff\r")
-# 	time.sleep(0.5)
-# 	serPort.write("gpio writeall 00000000\r")
-# 	time.sleep(0.5)
-
-
-
-# print "Receiving..."
-# result =  ws.recv()
-# print "Received '%s'" % result
-# ws.close()
 
 
 # Request from client to server
-listenToBits = {
+listenToEvents = {
   "type": "LISTEN",
   "data": {
-    "topics": ["channel-bits-events-v1." + secrets["id"]],
+
+    "topics": ["channel-points-channel-v1."+secrets["id"], "channel-bits-events-v2."+secrets["id"], "channel-subscribe-events-v1."+secrets["id"] ],
     "auth_token": secrets["key"]
   }
 }
 
 
-listenToPoints = {
-  "type": "LISTEN",
-  "data": {
-    "topics": ["channel-points-channel-v1." + secrets["id"]],
-    "auth_token": secrets["key"]
-  }
-}
-
-
-# sampleBitMessage = """{u'data': {u'topic': u'channel-bits-events-v1.105293178', u'message': u'{"data":{"user_name":"theotherlonestar","channel_name":"nicksmadscience","user_id":"85403751","channel_id":"105293178","time":"2020-07-08T18:19:08.675974326Z","chat_message":"Cheer1","bits_used":1,"total_bits_used":2,"context":"cheer","badge_entitlement":{"new_version":0,"previous_version":0},"badge_tier_entitlement":{"Badge":{"new_version":0,"previous_version":0},"Emoticons":null}},"version":"1.0","message_type":"bits_event","message_id":"00dff0b8-2c17-5075-931a-ff6ecded4bf4"}'}, u'type': u'MESSAGE'}"""
-
-# message_post_json = json.loads(sampleBitMessage)
-# print message_post_json["type"]
-# print message_post_json["type"]["data"]
-# print message_post_json["type"]["data"]["topic"]
 
 def on_message(ws, message):
     global serPort
 
+    print message
+
     if message.find("channel-bits-events") != -1:
-        print "OH HECK IT'S BIT O'CLOCK"
+        print "OH HECK IT'S BITS O'CLOCK"
         serPort.write("gpio clear 5\r") # turn on the yellow strobe
         time.sleep(10)
         serPort.write("gpio set 5\r") # turn off the yellow strobe
+    elif message.find("77f991d8-a75c-4273-91b6-259e25009617") != -1:
+        print "OH HECK IT'S CHIME O'CLOCK"
+        serPort.write("gpio clear 0\r") # turn on the chime
+        time.sleep(0.5)
+        serPort.write("gpio set 0\r") # turn off the chime
 
     # message_post_json = json.loads(message) 
     # print message_post_json
@@ -104,8 +85,7 @@ def on_close(ws):
 
 def on_open(ws):
     def run(*args):
-        ws.send(json.dumps(listenToBits))
-        ws.send(json.dumps(listenToPoints))
+        ws.send(json.dumps(listenToEvents))
         while True:
             try:
                 time.sleep(1)
@@ -118,6 +98,11 @@ def on_open(ws):
         # ws.close()
         print "thread terminating..."
     thread.start_new_thread(run, ())
+
+
+websocketStatusThread = Thread(target=websocketStatus)
+websocketStatusThread.daemon = True
+websocketStatusThread.start()
 
 
 if __name__ == "__main__":
