@@ -60,20 +60,12 @@ def on_message(ws, message):
         serPort.write("gpio clear 0\r") # turn on the chime
         time.sleep(0.5)
         serPort.write("gpio set 0\r") # turn off the chime
+    elif message.find("6dcaa344-0bae-40f8-b2ff-baa3ace98cd3") != -1:
+        print "OH HECK IT'S FOG O'CLOCK"
+        serPort.write("gpio clear 6\r") # turn on the fog machine
+        time.sleep(5)
+        serPort.write("gpio set 6\r") # turn off the fog machine
 
-    # message_post_json = json.loads(message) 
-    # print message_post_json
-
-    # try:
-    #     if message_post_json["type"] == "MESSAGE":
-    #         print "type is message"
-    #         if message_post_json["type"]["data"]["topic"] == "channel-bits-events-v1.105293178":
-    #             print "OH HECK IT'S BIT O'CLOCK"
-    #             serPort.write("gpio clear 5\r") # turn on the yellow strobe
-    #             time.sleep(10)
-    #             serPort.write("gpio set 5\r") # turn off the yellow strobe
-    # except:
-    #     traceback.print_exc()
 
         
 
@@ -100,17 +92,41 @@ def on_open(ws):
     thread.start_new_thread(run, ())
 
 
-websocketStatusThread = Thread(target=websocketStatus)
-websocketStatusThread.daemon = True
-websocketStatusThread.start()
 
-
-if __name__ == "__main__":
-    websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("wss://pubsub-edge.twitch.tv",
+ws = websocket.WebSocketApp("wss://pubsub-edge.twitch.tv",
                                 on_message = on_message,
                                 on_error = on_error,
                                 on_close = on_close)
-    ws.on_open = on_open
 
-    ws.run_forever()
+
+def pingManager():
+    global ws
+
+    while True:
+        time.sleep(4.0 * 60.0)
+        ws.send("""{"type": "PING"}""")
+        
+
+
+
+
+
+
+
+
+
+
+
+
+# if __name__ == "__main__":
+
+
+websocket.enableTrace(True)
+
+ws.on_open = on_open
+
+pingManagerThread = Thread(target=pingManager)
+pingManagerThread.daemon = True
+pingManagerThread.start()
+
+ws.run_forever()
