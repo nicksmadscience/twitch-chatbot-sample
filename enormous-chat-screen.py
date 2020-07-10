@@ -50,60 +50,17 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         print clients
 
       
-    def on_message(self, message):
+    def on_message(self, message):  # when the script receives a message from the web browser
         print 'message received:  %s' % message
 
-        if message == "deathcounter":
-            with open("deathcounter.txt", "rb") as deathcounter_file:
-                deathcounter = int(deathcounter_file.read())
-
-            deathcounter += 1
-            print "death counter: " + str(deathcounter)
-
-            with open("deathcounter.txt", "wb") as deathcounter_file:
-                deathcounter_file.write(str(deathcounter))
+        if message == "sample message":
+            # do sample thing
+            pass
 
             for client in clients:
-                client.write_message(json.dumps({"messagetype": "deathcounter", "animation": "explode", "deathcounter": str(deathcounter)}))
-        elif message == "water deathcounter":
-            with open("deathcounter.txt", "rb") as deathcounter_file:
-                deathcounter = int(deathcounter_file.read())
+                client.write_message(json.dumps({"messagetype": "sample response", "animation": "explode"}))
 
-            deathcounter += 1
-            print "death counter: " + str(deathcounter)
 
-            with open("deathcounter.txt", "wb") as deathcounter_file:
-                deathcounter_file.write(str(deathcounter))
-
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "deathcounter", "animation": "water", "deathcounter": str(deathcounter)}))
-        elif message == "refresh deathcounter":
-            with open("deathcounter.txt", "rb") as deathcounter_file:
-                deathcounter = int(deathcounter_file.read())
-
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "deathcounter", "animation": "explode", "deathcounter": str(deathcounter)}))
-        elif message == "decrement deathcounter":
-            with open("deathcounter.txt", "rb") as deathcounter_file:
-                deathcounter = int(deathcounter_file.read())
-
-            deathcounter -= 1
-            print "death counter: " + str(deathcounter)
-
-            with open("deathcounter.txt", "wb") as deathcounter_file:
-                deathcounter_file.write(str(deathcounter))
-
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "deathcounter", "animation": "reverse", "deathcounter": str(deathcounter)}))
-        elif message == "twelve":
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "oneshot", "video": "twelverlay.webm"}))
-        elif message == "themoyouknow":
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "oneshot", "video": "themoyouknow.webm"}))
-        elif message == "ohshit":
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "oneshot", "video": "one shot- oh shiiiiiiiiiiit.webm"}))
         elif message[0:7] == "generic":
             for client in clients:
                 client.write_message(json.dumps({"messagetype": "generic", "message": message[8:]}))
