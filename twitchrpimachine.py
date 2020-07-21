@@ -1,3 +1,18 @@
+
+
+# TODO: do I seriously have to subscribe to webhooks on top of IRC and PubSub?  I'll do it if I have to I guess
+
+# TODO: consider setting custom events up in a configuration file
+# event type (chat string, follow, sub, etc.)
+# thing you want to happen, which I guess could be code?  
+
+
+
+
+
+
+
+
 import sys
 import time
 import serial
@@ -177,6 +192,7 @@ serPort = serial.Serial(relayCardSerial, 9600, timeout=1)
 # Set GPIOs to defaults
 
 
+serPort.write("gpio set 0\r") # turn off the raid strobe
 serPort.write("gpio set 2\r") # turn off the red strobe
 serPort.write("gpio set 3\r") # turn off the yellow strobe
 serPort.write("gpio set 6\r") # turn off the fog machine
@@ -223,9 +239,9 @@ def on_message(ws, message):
     if message.find("channel-bits-events") != -1:
         print "OH HECK IT'S BITS O'CLOCK"
 
-        if message.find(string.lower("Cheer1")) != -1:
+        if message.find(string.lower("Cheer100")) != -1:
             requests.get("http://10.0.0.3/attention")
-        elif message.find(string.lower("Cheer2")) != -1:
+        elif message.find(string.lower("Cheer101")) != -1:
             requests.get("http://10.0.0.5/attention")
 
 
@@ -329,6 +345,7 @@ pingManagerThread.start()
 # if __name__ == "__main__":  # TODO: This kinda broke things and I don't yet fully understand why?
 
 
+
 # start websocket stuff
 
 websocket.enableTrace(True)
@@ -353,10 +370,11 @@ p = compile(":{}!{}@{}.tmi.twitch.tv PRIVMSG #{} :{}")
 
 
 def generateNewColor():
+    """Much like Twitch chat itself, every username gets its own random color.  This generates said random color"""
     return "rgb(%d, %d, %d)" % (int(random.random() * 128 + 128), int(random.random() * 128 + 128), int(random.random() * 128 + 128))
 
-usersInChat = {}
-chatLineNumber = 0
+usersInChat = {}     # list of all unique users in chat
+chatLineNumber = 0   # Increments by one each time a new chat line comes in
 
 go = True
 while go:
@@ -388,11 +406,14 @@ while go:
 
                 message = messageDeconstructed[4]
 
-                if username not in usersInChat:
-                    color = generateNewColor()
-                    usersInChat[username] = {"color": color}
-                else:
-                    color = usersInChat[username]["color"]
+
+                # commented out until I need chat functionality
+
+                # if username not in usersInChat:
+                #     color = generateNewColor()
+                #     usersInChat[username] = {"color": color}
+                # else:
+                #     color = usersInChat[username]["color"]
 
                 # line = json.dumps({"messagetype": "chat", "color": color, "username": username, "message": message, "messageWithUsernameIfAny": username + ": " + message, "messageType": "privmsg", "chatLineNumber": chatLineNumber})#"<p class='chatline' style='color: %s'>%s: %s</p>" % (color, username, message)
 
@@ -404,6 +425,14 @@ while go:
 
                 elif message.find("is raiding") != -1:
                     print ("OMFG RAIDZ")
+                    turnOnRelay(relay_raidlight)
+                    turnOnRelay(relay_fogmachine)
+                    requests.get("http://10.0.0.44:8081/preset/totd")
+                    time.sleep(10)
+                    turnOffRelay(relay_fogmachine)
+                    time.sleep(10)
+                    turnOffRelay(relay_raidlight)
+                    requests.get("http://10.0.0.44:8081/preset/nms")
 
 
             # else:
