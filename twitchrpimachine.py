@@ -7,7 +7,49 @@
 # thing you want to happen, which I guess could be code?  
 
 
+# TODO: websocket for interfacing with outside stuff, e.g. devops-style git push event?
+#          TO CLARIFY: make an overlay or IRL event happen when I "git push"
 
+
+# TODO: flashy thing for new subscriber.  I think I need to generate a new key combo for this one
+#          TO CLARIFY: by what means should I be notified of a new subscriber?
+
+
+
+# TODO: LOG EVERYTHING
+#            - that arrives via IRC
+#            - that arrives via PubSub
+#            - that arrives via Webhooks
+
+
+
+# TODO: stick to just PubSub?  undocumented event types might exist
+#            e.g. Hype Train https://pastebin.com/WLK1frBZ
+
+
+
+# ALL EVENTS I WANT TO TRACK
+# New follower
+# New subscription
+# Raid
+# Bits
+# Chanel points
+# Hype train
+
+
+# CHANNELS BY WHICH STUFF COMES IN
+
+# Webhooks
+    # New Followers (possibly only route?  would like to avoid webhooks if i'd just need them for follows and there's some undocumented other way)
+
+# PubSub
+    # Points
+    # Bits
+    # Subs
+    # Hype train
+
+# Chat / IRC
+    # Raid
 
 
 
@@ -47,8 +89,8 @@ relay_raidlight   = 0
 relay_raidpulse   = 1
 relay_redlight    = 2
 relay_yellowlight = 3
-relay_bluelight   = 4
-relay_chime       = 5
+relay_bluelight   = 5
+relay_chime       = 4
 relay_fogmachine  = 6
 
 led_raid     = 8
@@ -192,10 +234,11 @@ serPort = serial.Serial(relayCardSerial, 9600, timeout=1)
 # Set GPIOs to defaults
 
 
-serPort.write("gpio set 0\r") # turn off the raid strobe
-serPort.write("gpio set 2\r") # turn off the red strobe
-serPort.write("gpio set 3\r") # turn off the yellow strobe
-serPort.write("gpio set 6\r") # turn off the fog machine
+serPort.write("gpio set " + str(relay_raidlight)   + "\r")
+serPort.write("gpio set " + str(relay_redlight)    + "\r")
+serPort.write("gpio set " + str(relay_yellowlight) + "\r")
+serPort.write("gpio set " + str(relay_bluelight)   + "\r")
+serPort.write("gpio set " + str(relay_fogmachine)  + "\r")
 
 
 
@@ -423,6 +466,7 @@ while go:
                     print ("OMFG CHEER")
 
 
+                # TODO: obviously, screen to make sure this is coming from an authorized account
                 elif message.find("is raiding") != -1:
                     print ("OMFG RAIDZ")
                     turnOnRelay(relay_raidlight)
@@ -433,6 +477,11 @@ while go:
                     time.sleep(10)
                     turnOffRelay(relay_raidlight)
                     requests.get("http://10.0.0.44:8081/preset/nms")
+                elif message.find("Thank you for following") != -1:
+                    print ("OMFG NEW FOLLOWER")
+                    turnOnRelay(relay_bluelight)
+                    time.sleep(5)
+                    turnOffRelay(relay_bluelight)
 
 
             # else:
