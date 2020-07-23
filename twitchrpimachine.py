@@ -53,6 +53,8 @@
 
 
 
+# TODO: log everything!
+
 
 
 import sys
@@ -80,7 +82,6 @@ import socket
 
 # constant-y stuff
 
-
 with open("secrets.json") as secrets_file:
     secrets = json.loads(secrets_file.read())
 
@@ -100,6 +101,16 @@ led_host     = 11
 led_points   = 12
 led_follow   = 13
 led_onair    = 14
+
+
+
+# TODO: eventually what I wanna do is keep a record of everyone who triggered each event
+# (at least with the competing dog buttons) and how many times they did each thing
+
+count = {"red": 0, "yellow": 0}
+
+# TODO: make a master count (i.e. keep it in a file)
+
 
 
 
@@ -171,11 +182,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
  
     def check_origin(self, origin):
         return True
-
-
-
-
-
 
 
 
@@ -275,7 +281,7 @@ def turnOffLED(_relay):
 
 
 def on_message(ws, message):
-    global serPort
+    global serPort, count
 
     print message
 
@@ -330,10 +336,14 @@ def on_message(ws, message):
 
     elif message.find("1f1bc054-a48f-418b-b148-bfe14580bb4b") != -1:
         print "OH HECK IT'S YELLOW BUTTON A O'CLOCK"
+        count["yellow"] += 1
+        print ("yellow: " + str(count["red"]) + "  red: " + str(count["red"]))
         requests.get("http://10.0.0.3/attention")
 
     elif message.find("a015be4f-c7ff-4a27-b519-414a4afc02a1") != -1:
         print "OH HECK IT'S RED BUTTON B O'CLOCK"
+        count["red"] += 1
+        print ("yellow: " + str(count["red"]) + "  red: " + str(count["red"]))
         requests.get("http://10.0.0.5/attention")
 
     # TODO: implement raid once I can do chat
