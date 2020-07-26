@@ -1,0 +1,139 @@
+<html>
+	<head>
+		<title>Websocket alerts!</title>
+		<style type="text/css">
+
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@700&display=swap');
+
+body
+{
+	background: none transparent;
+	width: 1920px;
+	height: 1080px;
+	font-family: 'Josefin Slab', serif;
+}
+
+#fullscreenvideoplayer
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	z-index: 1000;
+}
+
+
+#fullscreenvideoholder
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+}
+
+
+.dogbuttoncounter
+{
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+	font-size: 55px;
+}
+
+.dogbuttoncounter-red
+{
+	color: red;
+}
+
+.dogbuttoncounter-yellow
+{
+	color: yellow;
+}
+
+
+		</style>
+		<script type="text/javascript">
+
+
+function newWebsocket()
+{
+    console.log("new websocket");
+    s = new WebSocket("ws://10.0.0.220:6789/ws");
+
+    s.onopen = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-notconnected"))
+        //     status.classList.replace("status-notconnected", "status-connected")
+        // status.innerHTML = "Connected";
+        console.log("opened");
+        // document.getElementById("websocketstatus").classList.remove("notconnected");
+    }
+    
+    s.onclose = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-connected"))
+        //     status.classList.replace("status-connected", "status-notconnected")
+        // status.innerHTML = "Not Connected";
+        console.log("closed");
+        // document.getElementById("websocketstatus").classList.add("notconnected");
+
+        setTimeout(function() { newWebsocket(); }, 3000);
+    }
+    
+    s.onmessage = function(e)
+    {
+        console.log(e.data);
+        var websocketMessage_array = JSON.parse(e.data);
+
+
+        if (websocketMessage_array["messagetype"] == "subscription")
+        {
+        	console.log("subscription!");
+        	var fullscreenvideoplayer = document.getElementById("fullscreenvideoplayer");
+        	var fullscreenvideoplayersource = document.getElementById("fullscreenvideoplayer-source");
+
+
+        	if (fullscreenvideoplayersource.src != websocketMessage_array["video"])
+        	{
+        		fullscreenvideoplayersource.src = websocketMessage_array["video"];
+        		fullscreenvideoplayer.load();
+        	}
+
+        	fullscreenvideoplayer.currentTime = 0;
+        	fullscreenvideoplayer.play();
+
+	    }
+	    else if (websocketMessage_array["messagetype"] == "dogbutton")
+	    {
+	    	document.getElementById("dogbuttoncounter-red-count").innerHTML = websocketMessage_array["count"]["red"];
+
+	    	document.getElementById("dogbuttoncounter-yellow-count").innerHTML = websocketMessage_array["count"]["yellow"];
+	    }
+	    else if (websocketMessage_array["messagetype"] == "")
+    }
+}
+
+window.onload = function()
+{
+    newWebsocket();
+}
+
+</script>
+	</head>
+	<body>
+		<!-- <div id="fullscreenvideoholder">
+			<video id="fullscreenvideoplayer" width="1920" height="1080">
+				<source id="fullscreenvideoplayer-source" src="alert - new follower.webm" type="video/webm">
+			</video>
+		</div> -->
+		<div class="dogbuttoncounter" id="dogbuttoncounter">
+			<span class="dogbuttoncounter-red">Red: <span id="dogbuttoncounter-red-count">(no info)</span></span>
+			<span class="dogbuttoncounter-yellow">Yellow: <span id="dogbuttoncounter-yellow-count">(no info)</span></span>
+		</div>
+	</body>
+</html>

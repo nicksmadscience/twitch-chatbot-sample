@@ -1,0 +1,124 @@
+<html>
+	<head>
+		<title>Websocket alerts!</title>
+		<meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+		<style type="text/css">
+
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@700&display=swap');
+
+body
+{
+	background: #222;
+	font-family: 'Josefin Slab', serif;
+}
+
+#fullscreenvideoplayer
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	z-index: 1000;
+}
+
+
+#fullscreenvideoholder
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+}
+
+
+.dogbuttoncounter
+{
+	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+	font-size: 400px;
+}
+
+.dogbuttoncounter-red
+{
+	color: red;
+	position: absolute;
+	left: 20px;
+	top: 80px;
+}
+
+.dogbuttoncounter-yellow
+{
+	color: yellow;
+	position: absolute;
+	right: 20px;
+	top: 80px;
+}
+
+
+		</style>
+		<script type="text/javascript">
+
+
+function newWebsocket()
+{
+    console.log("new websocket");
+    s = new WebSocket("ws://10.0.0.220:6789/ws");
+
+    s.onopen = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-notconnected"))
+        //     status.classList.replace("status-notconnected", "status-connected")
+        // status.innerHTML = "Connected";
+        console.log("opened");
+        // document.getElementById("websocketstatus").classList.remove("notconnected");
+    }
+    
+    s.onclose = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-connected"))
+        //     status.classList.replace("status-connected", "status-notconnected")
+        // status.innerHTML = "Not Connected";
+        console.log("closed");
+        // document.getElementById("websocketstatus").classList.add("notconnected");
+
+        setTimeout(function() { newWebsocket(); }, 3000);
+    }
+    
+    s.onmessage = function(e)
+    {
+        console.log(e.data);
+        var websocketMessage_array = JSON.parse(e.data);
+
+
+        if (websocketMessage_array["messagetype"] == "subscription")
+        {
+
+
+	    }
+	    else if (websocketMessage_array["messagetype"] == "dogbutton")
+	    {
+	    	document.getElementById("dogbuttoncounter-red-count").innerHTML = websocketMessage_array["count"]["red"];
+
+	    	document.getElementById("dogbuttoncounter-yellow-count").innerHTML = websocketMessage_array["count"]["yellow"];
+	    }
+    }
+}
+
+window.onload = function()
+{
+    newWebsocket();
+}
+
+</script>
+	</head>
+	<body>
+		<div class="dogbuttoncounter" id="dogbuttoncounter">
+			<div class="dogbuttoncounter-red" id="dogbuttoncounter-red-count">n</div>
+			<div class="dogbuttoncounter-yellow" id="dogbuttoncounter-yellow-count">n</div>
+		</div>
+	</body>
+</html>

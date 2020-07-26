@@ -1,0 +1,129 @@
+<html>
+	<head>
+		<title>Websocket alerts!</title>
+		<meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+		<style type="text/css">
+
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@700&display=swap');
+
+body
+{
+	background: #222;
+	font-family: 'Josefin Slab', serif;
+}
+
+#fullscreenvideoplayer
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	z-index: 1000;
+}
+
+
+#fullscreenvideoholder
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+}
+
+
+.dogbuttoncounter
+{
+	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+	font-size: 400px;
+}
+
+.dogbuttoncounter-red
+{
+	color: red;
+	position: absolute;
+	left: 20px;
+	top: 80px;
+}
+
+.dogbuttoncounter-blue
+{
+	color: blue;
+	position: absolute;
+	right: 20px;
+	top: 80px;
+}
+
+
+		</style>
+		<script type="text/javascript">
+
+
+    /*
+        if (websocketMessage_array["messagetype"] == "subscription")
+        {
+
+
+	    }
+	    else if (websocketMessage_array["messagetype"] == "dogbutton")
+	    {
+	    	document.getElementById("dogbuttoncounter-red-count").innerHTML = websocketMessage_array["count"]["red"];
+
+	    	document.getElementById("dogbuttoncounter-yellow-count").innerHTML = websocketMessage_array["count"]["yellow"];
+	    }
+
+	    */
+
+
+
+var xmlhttp;
+function loadXMLDoc(url,cfunc)
+{
+    if (window.XMLHttpRequest)
+          xmlhttp=new XMLHttpRequest();  // code for IE7+, Firefox, Chrome, Opera, Safari
+
+    xmlhttp.onreadystatechange=cfunc;
+    xmlhttp.open("GET",url,true);
+    xmlhttp.send();
+}
+
+
+
+
+
+
+
+function updateScore()
+{
+	loadXMLDoc("http://10.0.0.220:8081/count", function()
+    {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            var count = JSON.parse(xmlhttp.responseText);
+            console.log(count);
+
+            document.getElementById("dogbuttoncounter-red-count").innerHTML = count["red"];
+            document.getElementById("dogbuttoncounter-blue-count").innerHTML = count["blue"];
+        }
+    });
+}
+
+
+
+window.onload = function()
+{
+    updateScore();
+    setInterval(updateScore, 5000);
+}
+
+</script>
+	</head>
+	<body>
+		<div class="dogbuttoncounter" id="dogbuttoncounter">
+			<div class="dogbuttoncounter-red" id="dogbuttoncounter-red-count">n</div>
+			<div class="dogbuttoncounter-blue" id="dogbuttoncounter-blue-count">n</div>
+		</div>
+	</body>
+</html>

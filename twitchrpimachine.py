@@ -72,11 +72,16 @@ from parse import *
 from parse import compile
 import random
 
+# websockets
 import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
 import tornado.web
 import socket
+
+from threading import Thread
+from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+PORT_NUMBER = 8081
 
 
 
@@ -107,9 +112,13 @@ led_onair    = 14
 # TODO: eventually what I wanna do is keep a record of everyone who triggered each event
 # (at least with the competing dog buttons) and how many times they did each thing
 
-count = {"red": 0, "yellow": 0}
+count = {"red": 0, "blue": 0}
 
-# TODO: make a master count (i.e. keep it in a file)
+# Keep the count persistent between sessions
+with open("count.json", "rb") as count_file:
+    count = json.loads(count_file.read())
+
+print count
 
 
 
@@ -133,6 +142,96 @@ s.send("PASS " + secrets["irc_oauth"] + "\r\n")
 s.send("NICK nicksmadscience\r\n")
 s.send("JOIN #nicksmadscience\r\n")
 
+
+
+
+
+
+# webserver!
+
+
+# def requestHandler_tempDisable(_get):
+#     global tempDisable, baseChannels
+
+#     if _get[2] == "on":
+#         tempDisable = True
+#         # sendChannels(baseChannels)
+#         return "text/plain", "tempDisable on"
+#     elif _get[2] == "off":
+#         tempDisable = False
+#         return "text/plain", "tempDisable off"
+#     else:
+#         return "text/plain", "tempDisable command not recognized (" + _get[2] + ")"
+
+
+
+
+# httpRequests = {''      : requestHandler_index,
+#                 'preset': requestHandler_preset,
+#                 'tempEnable': requestHandler_tempEnable,
+#                 'tempDisable': requestHandler_tempDisable,
+#                 'lightsout': requestHandler_lightsout,
+#                 'color': requestHandler_color,
+#                 'set': requestHandler_set,
+#                 }
+
+
+def requestHandler_index(_get):
+    return "text/plain", "TWITCH RPI MACHINE GO"
+
+def requestHandler_count(_get):
+    global count
+    return "text/plain", json.dumps(count)
+
+
+httpRequests = {'': requestHandler_index,
+                'count': requestHandler_count}
+
+
+
+#This class will handles any incoming request from
+#the browser 
+class myHandler(BaseHTTPRequestHandler):
+    
+    #Handler for the GET requests
+    def do_GET(self):
+        elements = self.path.split('/')
+
+        responseFound = False
+        for httpRequest, httpHandler in httpRequests.iteritems():
+            # print elements[1] + " == " + httpRequest
+            if elements[1] == httpRequest: # in other words, if the first part matches
+                contentType, response = httpHandler(elements)
+                responseFound = True
+
+                self.send_response(200)
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header('Content-type', contentType)
+                self.end_headers()
+
+                self.wfile.write(response)
+        if not responseFound:
+            contentType, response = requestHandler_index('/')
+
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header('Content-type', contentType)
+            self.end_headers()
+
+            self.wfile.write(response)
+            
+        return
+
+
+def http():
+    server = HTTPServer(('', PORT_NUMBER), myHandler)
+    print 'Started httpserver on port ' , PORT_NUMBER
+
+    server.serve_forever()
+
+httpThread = Thread(target=http)
+httpThread.daemon = True
+httpThread.start()
 
 
 
@@ -281,7 +380,7 @@ def turnOffLED(_relay):
 
 
 def on_message(ws, message):
-    global serPort, count
+    global serPort, count, clients
 
     print message
 
@@ -289,7 +388,7 @@ def on_message(ws, message):
         print "OH HECK IT'S BITS O'CLOCK"
 
         if message.find(string.lower("Cheer100")) != -1:
-            requests.get("http://10.0.0.3/attention")
+            requests.get("http://10.0.0.4/attention")
         elif message.find(string.lower("Cheer101")) != -1:
             requests.get("http://10.0.0.5/attention")
 
@@ -335,16 +434,34 @@ def on_message(ws, message):
         turnOffRelay(relay_fogmachine)
 
     elif message.find("1f1bc054-a48f-418b-b148-bfe14580bb4b") != -1:
-        print "OH HECK IT'S YELLOW BUTTON A O'CLOCK"
-        count["yellow"] += 1
-        print ("yellow: " + str(count["red"]) + "  red: " + str(count["red"]))
-        requests.get("http://10.0.0.3/attention")
+        print "OH HECK IT'S BLUE BUTTON A O'CLOCK"
+        count["blue"] += 1
+        print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
+        try:
+            requests.get("http://10.0.0.4/attention")
+        except Exception as e:
+            traceback.print_exc(e)
+
+        for client in clients:
+            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+
+        with open("count.json", "wb") as count_file:
+            count_file.write(json.dumps(count))
 
     elif message.find("a015be4f-c7ff-4a27-b519-414a4afc02a1") != -1:
         print "OH HECK IT'S RED BUTTON B O'CLOCK"
         count["red"] += 1
-        print ("yellow: " + str(count["red"]) + "  red: " + str(count["red"]))
-        requests.get("http://10.0.0.5/attention")
+        print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
+        try:
+            requests.get("http://10.0.0.5/attention")
+        except Exception as e:
+            traceback.print_exc(e)
+
+        for client in clients:
+            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+
+        with open("count.json", "wb") as count_file:
+            count_file.write(json.dumps(count))
 
     # TODO: implement raid once I can do chat
 
