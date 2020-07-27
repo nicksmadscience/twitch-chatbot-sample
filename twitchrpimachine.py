@@ -71,6 +71,7 @@ import string
 from parse import *
 from parse import compile
 import random
+import datetime
 
 # websockets
 import tornado.httpserver
@@ -113,6 +114,10 @@ led_onair    = 14
 # (at least with the competing dog buttons) and how many times they did each thing
 
 count = {"red": 0, "blue": 0}
+countdown = {"active": False, "startTime": 0, "endTime": 0}
+
+# TODO: doesn't need to be just 'count'!  System-wide status could be kept in a single dict
+
 
 # Keep the count persistent between sessions
 with open("count.json", "rb") as count_file:
@@ -147,34 +152,13 @@ s.send("JOIN #nicksmadscience\r\n")
 
 
 
-# webserver!
+####### WEBSERVER #######
 
 
-# def requestHandler_tempDisable(_get):
-#     global tempDisable, baseChannels
-
-#     if _get[2] == "on":
-#         tempDisable = True
-#         # sendChannels(baseChannels)
-#         return "text/plain", "tempDisable on"
-#     elif _get[2] == "off":
-#         tempDisable = False
-#         return "text/plain", "tempDisable off"
-#     else:
-#         return "text/plain", "tempDisable command not recognized (" + _get[2] + ")"
-
-
-
-
-# httpRequests = {''      : requestHandler_index,
-#                 'preset': requestHandler_preset,
-#                 'tempEnable': requestHandler_tempEnable,
-#                 'tempDisable': requestHandler_tempDisable,
-#                 'lightsout': requestHandler_lightsout,
-#                 'color': requestHandler_color,
-#                 'set': requestHandler_set,
-#                 }
-
+# PROCESS FOR ADDING NEW HTTP GET REQUESTS
+# 1. add a requestHandler_xxx function, e.g. def requestHandler_butts(_get): (where _get) is the full HTTP GET request text
+# 2. function should return 1. the ContentType (e.g. "text/plain"), 2. the response text
+# 3. add said function to httpRequests, e.g. ('butts': requestHandler_butts)
 
 def requestHandler_index(_get):
     return "text/plain", "TWITCH RPI MACHINE GO"
@@ -183,9 +167,42 @@ def requestHandler_count(_get):
     global count
     return "text/plain", json.dumps(count)
 
+def requestHandler_startCountdown(_get):
+    global countdown # TODO: once again not sure how to avoid a global
+
+    current_time = time.time()
+    current_milli_time = int(round(current_time * 1000)) # stolen from https://stackoverflow.com/questions/5998245/get-current-time-in-milliseconds-in-python
+
+    # future_date_after_2yrs = ini_time_for_now + timedelta(days = 730) 
+
+    minutes = int(_get[2])
+    seconds = int(_get[3])
+
+    print("minutes: " + str(minutes) + "  seconds: " + str(seconds))
+
+    end_milli_time = current_milli_time + (minutes * 60000) + (seconds * 1000)
+
+
+    countdown["active"] = True
+    countdown["startTime"] = current_milli_time
+    countdown["endTime"] = end_milli_time
+
+
+    return "text/plain", json.dumps(countdown)
+
+
+
+def requestHandler_countdownStatus(_get):
+    global countdown
+
+    return "text/plain", json.dumps(countdown)
+
+
 
 httpRequests = {'': requestHandler_index,
-                'count': requestHandler_count}
+                'count': requestHandler_count,
+                'startCountdown': requestHandler_startCountdown,
+                'countdownStatus': requestHandler_countdownStatus}
 
 
 
@@ -249,6 +266,10 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         print 'new connection'
         clients.append(self)
         print clients
+
+        # TODO: make a send-dog-button-count function
+        # TODO: devise a system for data that needs to be sent on every new connection
+        self.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
 
       
     def on_message(self, message):  # when the script receives a message from the web browser

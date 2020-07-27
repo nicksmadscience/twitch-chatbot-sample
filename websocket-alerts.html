@@ -48,9 +48,20 @@ body
 	color: red;
 }
 
-.dogbuttoncounter-yellow
+.dogbuttoncounter-blue
 {
-	color: yellow;
+	color: blue;
+}
+
+.countdownsample
+{
+	position: absolute;
+	top: 50px;
+	left: 50px;
+	color: black;
+	text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+	z-index: 1000;
+	font-size: 150px;
 }
 
 
@@ -112,9 +123,14 @@ function newWebsocket()
 	    {
 	    	document.getElementById("dogbuttoncounter-red-count").innerHTML = websocketMessage_array["count"]["red"];
 
-	    	document.getElementById("dogbuttoncounter-yellow-count").innerHTML = websocketMessage_array["count"]["yellow"];
+	    	document.getElementById("dogbuttoncounter-blue-count").innerHTML = websocketMessage_array["count"]["blue"];
 	    }
-	    else if (websocketMessage_array["messagetype"] == "")
+	    else if (websocketMessage_array["messagetype"] == "console")
+	    {
+	    	console.log(websocketMessage_array["message"])
+	    	// TODO: implement on server end
+	    }
+
     }
 }
 
@@ -131,9 +147,10 @@ window.onload = function()
 				<source id="fullscreenvideoplayer-source" src="alert - new follower.webm" type="video/webm">
 			</video>
 		</div> -->
+		<div class="countdownsample" id="countdownsample">(niente)</div>
 		<div class="dogbuttoncounter" id="dogbuttoncounter">
 			<span class="dogbuttoncounter-red">Red: <span id="dogbuttoncounter-red-count">(no info)</span></span>
-			<span class="dogbuttoncounter-yellow">Yellow: <span id="dogbuttoncounter-yellow-count">(no info)</span></span>
+			<span class="dogbuttoncounter-blue">blue: <span id="dogbuttoncounter-blue-count">(no info)</span></span>
 		</div>
 	</body>
 </html>
