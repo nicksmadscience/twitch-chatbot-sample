@@ -1,13 +1,15 @@
 <html>
 	<head>
 		<title>Websocket alerts!</title>
+		<meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
 		<style type="text/css">
 
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@700&display=swap');
 
 body
 {
-	background: none transparent;
+	background: black;
 	width: 1920px;
 	height: 1080px;
 	font-family: 'Josefin Slab', serif;
@@ -61,37 +63,8 @@ body
 	color: yellow;
 	text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
 	z-index: 1000;
-	font-size: 150px;
+	font-size: 95vh;
 }
-
-
-.marquee
-{
-	position: absolute;
-	/* left: 450px; */
-	left: 0px;
-	bottom: 0;
-	font-size: 80px;
-	color: black;
-	width: 1920px;
-	min-width: 1920px;
-	padding: 0;
-}
-
-.marquee-span
-{
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee 15s linear infinite;
-    min-width: 1920px;
-}
-
-@keyframes marquee
-{
-    0%   { transform: translate(0, 0); }
-    100% { transform: translate(-100%, 0); }
-}
-
 
 
 		</style>
@@ -167,12 +140,6 @@ function newWebsocket()
 	    	console.log(websocketMessage_array["timeLeft"]);
 	    	document.getElementById("countdownsample").innerHTML = websocketMessage_array["timeLeft"];
 	    }
-	    else if (messageType == "marquee")
-	    {
-	    	var marquee = document.getElementById("marquee-p");
-	    	marquee.innerHTML = websocketMessage_array["message"];
-	    	
-	    }
 
     }
 }
@@ -192,11 +159,6 @@ window.onload = function()
 				<source id="fullscreenvideoplayer-source" src="alert - new follower.webm" type="video/webm">
 			</video>
 		</div> -->
-		<!-- <div class="countdownsample" id="countdownsample">(niente)</div> -->
-		<div class="marquee"><span class="marquee-span" id="marquee-p">check test one two</span></div>
-		<div class="dogbuttoncounter" id="dogbuttoncounter">
-			<span class="dogbuttoncounter-red">Red: <span id="dogbuttoncounter-red-count">(no info)</span></span>
-			<span class="dogbuttoncounter-blue">blue: <span id="dogbuttoncounter-blue-count">(no info)</span></span>
-		</div>
+		<div class="countdownsample" id="countdownsample">(niente)</div>
 	</body>
 </html>

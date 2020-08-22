@@ -72,6 +72,7 @@ from parse import *
 from parse import compile
 import random
 import datetime
+import urllib2
 
 # websockets
 import tornado.httpserver
@@ -83,6 +84,8 @@ import socket
 from threading import Thread
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 PORT_NUMBER = 8081
+
+from twitchrpimachine_countdown import countdownClass
 
 
 
@@ -114,7 +117,14 @@ led_onair    = 14
 # (at least with the competing dog buttons) and how many times they did each thing
 
 count = {"red": 0, "blue": 0}
-countdown = {"active": False, "startTime": 0, "endTime": 0}
+# countdown = {"active": False, "startTime": 0, "endTime": 0}
+
+countdown = countdownClass("none", 0, 0) # set initial timer to one that immediately expires
+
+
+# awesomeBunchOfCountdowns = {"omfg": countdownClass("butts", 2, 2)}
+
+
 
 # TODO: doesn't need to be just 'count'!  System-wide status could be kept in a single dict
 
@@ -129,10 +139,18 @@ print count
 
 
 
-# initial setup
 
 
-# irc twitch interface
+######## HACKERY ########
+
+sevensegment = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+
+
+
+######## IRC / CHAT ########
+
+
 HOST="irc.chat.twitch.tv"
 PORT=6667
 readbuffer=""
@@ -170,22 +188,16 @@ def requestHandler_count(_get):
 def requestHandler_startCountdown(_get):
     global countdown # TODO: once again not sure how to avoid a global
 
-    current_time = time.time()
-    current_milli_time = int(round(current_time * 1000)) # stolen from https://stackoverflow.com/questions/5998245/get-current-time-in-milliseconds-in-python
+    name    = _get[2]
+    minutes = int(_get[3])
+    seconds = int(_get[4])
 
-    # future_date_after_2yrs = ini_time_for_now + timedelta(days = 730) 
-
-    minutes = int(_get[2])
-    seconds = int(_get[3])
-
-    print("minutes: " + str(minutes) + "  seconds: " + str(seconds))
-
-    end_milli_time = current_milli_time + (minutes * 60000) + (seconds * 1000)
-
-
-    countdown["active"] = True
-    countdown["startTime"] = current_milli_time
-    countdown["endTime"] = end_milli_time
+    try:
+        countdown = countdownClass(name, minutes, seconds)
+    except Exception as e:
+        return "text/plain", traceback.format_exc(e)
+    else:
+        return "text/plain", "Started"
 
 
     return "text/plain", json.dumps(countdown)
@@ -198,11 +210,93 @@ def requestHandler_countdownStatus(_get):
     return "text/plain", json.dumps(countdown)
 
 
+def requestHandler_marquee(_get):
+    """Initiate a scrolling marquee event."""
+    global clients
 
+    print urllib2.unquote(_get[2])
+
+    for client in clients:
+        client.write_message(json.dumps({"messagetype": "marquee", "message": urllib2.unquote(_get[2])}))
+
+    return "text/plain", str(_get)
+
+
+# sample title requests to make
+
+# http://10.0.0.220:8081/titleplay/tracebox.html/%7B%22textBoxUpdater%22:%20%22Welcome%20to%20Nicks%20Mad%20Science,%20a%20place%20of%20wonder%20and%20magic.%22%7D
+# http://10.0.0.220:8081/titleplay/nms-raidalert.html/%7B%22raidernameHandler%22:%20%22joeblow%22%7D
+# http://10.0.0.220:8081/videoplay/webm/alert-new-follower.webm
+
+
+# TODO - ALERTS
+
+
+
+
+
+
+
+
+def requestHandler_titlePlay(get):
+    """Fire off a Titlemaker title inside OBS."""
+    global clients
+
+    try:
+        for client in clients:
+            client.write_message(json.dumps({"messagetype": "titleplay", "url": get[2], "message": urllib2.unquote(get[3])}))
+    except:
+        return "text/plain", traceback.format_exc()
+    else:
+        return "text/plain", "ok"
+
+
+
+def requestHandler_videoPlay(get):
+    """Play a fullscreen video inside OBS / the player."""
+
+    global clients
+
+    # TODO: once again, more DRY-related issues here
+    try:
+        for client in clients:
+            client.write_message(json.dumps({"messagetype": "videoplay", "type": get[2], "url": get[3], "looping": get[4]}))
+    except:
+        return "text/plain", traceback.format_exc()
+    else:
+        return "text/plain", "ok"
+
+
+
+def requestHandler_resetDogCounter(get):
+    """Reset red and blue dog counter to zero."""
+    global clients, count
+
+    count = {"red": 0, "blue": 0}
+
+    try:
+
+        json.dump(count, open("count.json", "wb"))
+
+        for client in clients:
+            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+
+# TODO: make capitalization consistent
 httpRequests = {'': requestHandler_index,
                 'count': requestHandler_count,
                 'startCountdown': requestHandler_startCountdown,
-                'countdownStatus': requestHandler_countdownStatus}
+                'countdownStatus': requestHandler_countdownStatus,
+                'marquee': requestHandler_marquee,
+                'titleplay': requestHandler_titlePlay,
+                'videoplay': requestHandler_videoPlay,
+                'resetdogcounter': requestHandler_resetDogCounter}
 
 
 
@@ -255,12 +349,21 @@ httpThread.start()
 
 
 
+####### WEBSOCKET #######
+
 
 
 clients = [] # https://stackoverflow.com/questions/11695375/tornado-identify-track-connections-of-websockets
 
+
+# def sendFullStatus():
+#     global clients
+
+
+
+
 class WSHandler(tornado.websocket.WebSocketHandler):
-    global clients
+    global clients, count, countdown
 
     def open(self):
         print 'new connection'
@@ -270,6 +373,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         # TODO: make a send-dog-button-count function
         # TODO: devise a system for data that needs to be sent on every new connection
         self.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+        # self.write_message(json.dumps({"messagetype": "countdown", "status": countdown}))
 
       
     def on_message(self, message):  # when the script receives a message from the web browser
@@ -305,8 +409,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 
 
-
-# Tornado web application for Twitch IRC / chat interface
 application = tornado.web.Application([
     (r'/ws', WSHandler),
 ])
@@ -326,6 +428,78 @@ socketThread.start()
 
 
 
+def sendPeriodicUpdates():
+    """a li'l standalone thread that sends all system status-es every five seconds"""
+    global count, countdown, clients
+
+    while True:
+        time.sleep(5)
+
+        for client in clients:
+            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+            # client.write_message(json.dumps({"messagetype": "countdown", "status": countdown}))
+
+sendPeriodicUpdatesThread = Thread(target=sendPeriodicUpdates)
+sendPeriodicUpdatesThread.daemon = True
+sendPeriodicUpdatesThread.start()
+
+
+# TODO: class countdownManager, which can have members self.timers = []
+
+
+import PIL
+from PIL import ImageFont
+from PIL import Image
+from PIL import ImageDraw
+import socket
+
+font = ImageFont.truetype("slkscr.ttf",10)
+
+matrix = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+def countdownManager():
+    global countdown, clients, sevensegment
+
+    while True:
+        time.sleep(1)
+        timeLeft = countdown.timeLeft()
+        if timeLeft is not False:
+            print(timeLeft)
+            
+            try:
+                sevensegment.sendto(timeLeft + "                   ", ("10.0.0.245", 1234)) # HACK because I'd love for this to work now
+            except:
+                traceback_print_exc()
+
+            try:
+                img=Image.new("RGBA", (32,8),(0,0,0))
+
+                draw = ImageDraw.Draw(img)
+                draw.text((0, -3), timeLeft, font=font)
+                draw = ImageDraw.Draw(img)
+
+
+
+                omfg = b""
+                for x in range(0, 32):
+                    column = 0
+                    # print ("x")
+                    for y in range(0, 8):
+                        # print ("y")
+                        # print (img.getpixel((x, y)))
+                        column = column | (img.getpixel((x, y))[0] > 128) << y
+                    omfg += chr(column)
+
+                matrix.sendto(omfg, ("10.0.0.200", 1234))
+            except:
+                traceback.print_exc()
+
+            for client in clients:
+                client.write_message(json.dumps({"messagetype": "countdown", "timeLeft": timeLeft}))
+
+countdownManagerThread = Thread(target=countdownManager)
+countdownManagerThread.daemon = True
+countdownManagerThread.start()
 
 
 
@@ -484,7 +658,6 @@ def on_message(ws, message):
         with open("count.json", "wb") as count_file:
             count_file.write(json.dumps(count))
 
-    # TODO: implement raid once I can do chat
 
 
 def on_error(ws, error):
@@ -598,17 +771,19 @@ while go:
                 message = messageDeconstructed[4]
 
 
-                # commented out until I need chat functionality
 
-                # if username not in usersInChat:
-                #     color = generateNewColor()
-                #     usersInChat[username] = {"color": color}
-                # else:
-                #     color = usersInChat[username]["color"]
+                if username not in usersInChat:
+                    color = generateNewColor()
+                    usersInChat[username] = {"color": color}
+                else:
+                    color = usersInChat[username]["color"]
 
-                # line = json.dumps({"messagetype": "chat", "color": color, "username": username, "message": message, "messageWithUsernameIfAny": username + ": " + message, "messageType": "privmsg", "chatLineNumber": chatLineNumber})#"<p class='chatline' style='color: %s'>%s: %s</p>" % (color, username, message)
+                line = json.dumps({"messagetype": "chat", "color": color, "username": username, "message": message, "messageWithUsernameIfAny": username + ": " + message, "messageType": "privmsg", "chatLineNumber": chatLineNumber})#"<p class='chatline' style='color: %s'>%s: %s</p>" % (color, username, message)
 
                 print (message)
+
+                for client in clients:
+                    client.write_message(line)
 
                 if message[0:5].lower() == "cheer" or message[0:5].lower() == "corgo" or message[0:5] == "Butts":
                     print ("OMFG CHEER")
@@ -620,6 +795,7 @@ while go:
                     turnOnRelay(relay_raidlight)
                     turnOnRelay(relay_fogmachine)
                     requests.get("http://10.0.0.44:8081/preset/totd")
+                    requests.get("http://10.0.0.220:8081/titleplay/nms-raidalert.html/%7B%7D")
                     time.sleep(10)
                     turnOffRelay(relay_fogmachine)
                     time.sleep(10)

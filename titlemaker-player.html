@@ -1,0 +1,143 @@
+<html>
+	<head>
+		<title>Titlemaker sample player</title>
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="0" />
+		<style type="text/css">
+
+body
+{
+	background-color: none transparent;
+	width: 1920px;
+	height: 1080px;
+	margin: 0;
+	padding: 0;
+}
+
+
+
+#fullscreenvideoplayer
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	z-index: 1000;
+}
+
+
+#fullscreenvideoholder
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin: 0;
+	padding: 0;
+}
+
+		</style>
+		<script type="text/javascript">
+
+
+
+function newWebsocket()
+{
+    console.log("new websocket");
+    s = new WebSocket("ws://10.0.0.220:6789/ws");
+
+    s.onopen = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-notconnected"))
+        //     status.classList.replace("status-notconnected", "status-connected")
+        // status.innerHTML = "Connected";
+        console.log("opened");
+        // document.getElementById("websocketstatus").classList.remove("notconnected");
+    }
+    
+    s.onclose = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-connected"))
+        //     status.classList.replace("status-connected", "status-notconnected")
+        // status.innerHTML = "Not Connected";
+        console.log("closed");
+        // document.getElementById("websocketstatus").classList.add("notconnected");
+
+        setTimeout(function() { newWebsocket(); }, 3000);
+    }
+    
+    s.onmessage = function(e)
+    {
+        console.log(e.data);
+
+        var websocketMessage_array = JSON.parse(e.data);
+
+        var messageType = websocketMessage_array["messagetype"];
+
+
+	    if (messageType == "titleplay")
+	    {
+	    	var titleholder = document.getElementById("titleholder");
+
+	    	
+	    	titleholder.src = websocketMessage_array["url"];
+	    	console.log("titleholder url: " + titleholder.src);
+
+	    	titleholder.onload = function()
+	    	{
+	    		// update all the fields
+	    		var fields = JSON.parse(websocketMessage_array["message"]);
+	    		console.log(fields);
+	    		console.log(fields.length);
+
+				for (var key in fields)
+				{
+				    if (fields.hasOwnProperty(key))
+				    {
+				        console.log(key + " -> " + fields[key]);
+				        titleholder.contentWindow.eval(key + "('" + fields[key] + "')");
+				    }
+				}
+
+				titleholder.contentWindow.playAnimation();
+			}
+	    }
+	    else if (messageType == "videoplay")
+	    {
+	    	var fullscreenvideoplayer = document.getElementById("fullscreenvideoplayer");
+        	var fullscreenvideoplayersource = document.getElementById("fullscreenvideoplayer-source");
+
+
+        	fullscreenvideoplayersource.src = websocketMessage_array["url"];
+        	fullscreenvideoplayer.load();
+
+        	if (websocketMessage_array["looping"] == "looping")
+        		fullscreenvideoplayer.loop = true;
+        	else
+        		fullscreenvideoplayer.loop = false;
+
+        	fullscreenvideoplayer.currentTime = 0;
+        	fullscreenvideoplayer.play();
+	    }
+    }
+}
+
+
+
+window.onload = function()
+{
+    newWebsocket();
+}
+
+		</script>
+	</head>
+	<body>
+		<iframe src="about:blank" allowtransparency="true" class="frame" id="titleholder" width="1920px" height="1080px"></iframe>
+		<video id="fullscreenvideoplayer" width="1920" height="1080" autoplay>
+			<source id="fullscreenvideoplayer-source">
+		</video>
+	</body>
+</html>

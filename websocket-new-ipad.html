@@ -34,26 +34,44 @@ body
 }
 
 
-.dogbuttoncounter
+.dogbuttoncounter-container
 {
 	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
-	font-size: 400px;
+	font-size: 100px;
+	display: block;
 }
+
 
 .dogbuttoncounter-red
 {
 	color: red;
-	position: absolute;
-	left: 20px;
-	top: 80px;
+	background-color: #400;
 }
 
-.dogbuttoncounter-yellow
+.dogbuttoncounter-blue
 {
-	color: yellow;
+	color: blue;
+	background-color: #004;
+}
+
+.dogbuttoncounter-number
+{
+	padding: 12px;
+	display: inline-block;
+}
+
+
+.countdownsample
+{
 	position: absolute;
-	right: 20px;
-	top: 80px;
+	bottom: 0;
+	left: 0;
+	color: yellow;
+	text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+	font-size: 130px;
+	background-color: #330;
+	min-width: 100px;
+	min-height: 100px;
 }
 
 
@@ -94,16 +112,23 @@ function newWebsocket()
         var websocketMessage_array = JSON.parse(e.data);
 
 
-        if (websocketMessage_array["messagetype"] == "subscription")
+        var messageType = websocketMessage_array["messagetype"];
+
+        if (messageType == "subscription")
         {
 
 
 	    }
-	    else if (websocketMessage_array["messagetype"] == "dogbutton")
+	    else if (messageType == "dogbutton")
 	    {
 	    	document.getElementById("dogbuttoncounter-red-count").innerHTML = websocketMessage_array["count"]["red"];
 
-	    	document.getElementById("dogbuttoncounter-yellow-count").innerHTML = websocketMessage_array["count"]["yellow"];
+	    	document.getElementById("dogbuttoncounter-blue-count").innerHTML = websocketMessage_array["count"]["blue"];
+	    }
+	    else if (messageType == "countdown")
+	    {
+	    	console.log(websocketMessage_array["timeLeft"]);
+	    	document.getElementById("countdownsample").innerHTML = websocketMessage_array["timeLeft"];
 	    }
     }
 }
@@ -116,9 +141,10 @@ window.onload = function()
 </script>
 	</head>
 	<body>
-		<div class="dogbuttoncounter" id="dogbuttoncounter">
-			<div class="dogbuttoncounter-red" id="dogbuttoncounter-red-count">n</div>
-			<div class="dogbuttoncounter-yellow" id="dogbuttoncounter-yellow-count">n</div>
+		<div class="dogbuttoncounter-container" id="dogbuttoncounter">
+			<div class="dogbuttoncounter-number dogbuttoncounter-red" id="dogbuttoncounter-red-count">n</div>
+			<div class="dogbuttoncounter-number dogbuttoncounter-blue" id="dogbuttoncounter-blue-count">n</div>
 		</div>
+		<div class="countdownsample" id="countdownsample"></div>
 	</body>
 </html>
