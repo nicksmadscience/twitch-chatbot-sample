@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="0" />
+		<title>Title wireframe</title>
+		<script type="text/javascript">
+
+
+
+function newWebsocket()
+{
+    console.log("new websocket");
+    s = new WebSocket("ws://10.0.0.220:6789/ws");
+
+    s.onopen = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-notconnected"))
+        //     status.classList.replace("status-notconnected", "status-connected")
+        // status.innerHTML = "Connected";
+        console.log("opened");
+        // document.getElementById("websocketstatus").classList.remove("notconnected");
+    }
+    
+    s.onclose = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-connected"))
+        //     status.classList.replace("status-connected", "status-notconnected")
+        // status.innerHTML = "Not Connected";
+        console.log("closed");
+        // document.getElementById("websocketstatus").classList.add("notconnected");
+
+        setTimeout(function() { newWebsocket(); }, 3000);
+    }
+    
+    s.onmessage = function(e)
+    {
+        console.log(e.data);
+        var websocketMessage_array = JSON.parse(e.data);
+
+        var messageType = websocketMessage_array["messagetype"];
+
+
+	    if (messageType == "dogbutton")
+	    {
+	    	// TODO: error handler
+	    	document.getElementById("score-red").innerHTML = websocketMessage_array["count"]["red"];
+	    	document.getElementById("score-blue").innerHTML = websocketMessage_array["count"]["blue"];
+	    	document.getElementById("period").innerHTML = websocketMessage_array["count"]["period"];
+	    	document.getElementById("teamname-red").innerHTML = websocketMessage_array["count"]["redteam"];
+	    	document.getElementById("teamname-blue").innerHTML = websocketMessage_array["count"]["blueteam"];
+	    }
+	    else if (messageType == "countdown")
+	    {
+	    	console.log(websocketMessage_array["timeLeft"]);
+
+	    	var countdownSplit = websocketMessage_array["timeLeft"].split(":");
+	    	document.getElementById("clock-minutes").innerHTML = countdownSplit[0];
+	    	document.getElementById("clock-seconds").innerHTML = countdownSplit[1];
+	    }
+
+    }
+}
+
+
+
+window.onload = function()
+{
+    newWebsocket();
+}
+
+
+		</script>
+		<style type="text/css">
+
+@import url('https://fonts.googleapis.com/css?family=VT323');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@600&display=swap');
+
+
+@font-face
+{
+    font-family: "Segment7Standard";
+    src: url("http://10.0.0.220/Segment7Standard.otf") format("opentype");
+}
+
+
+body
+{
+	/* These settings help eliminate oddities and inconsistencies */
+	background: none transparent;
+	position: absolute;
+	width: 1920px;   /* Titlemaker is currently fixed at 1080p */
+	height: 1080px;
+	padding: 0px;
+	margin: 0px;
+	overflow: hidden;
+}
+
+.scoreboard
+{
+	background: linear-gradient(20deg, #008800 0%, #005500 100%);
+	position: absolute;
+	bottom: 30px;
+	left: 700px;
+	width: 550px;
+	height: 350px;
+	border-radius: 20px;
+	border: 2px solid #003300;
+	box-shadow: 0 5px 0 #001800, 2px 2px 20px rgba(0, 0, 0, 0.8);
+}
+
+.scoreboard-borderinset
+{
+	border: 4px solid white;
+	position: absolute;
+	top: 10px;
+	bottom: 10px;
+	left: 10px;
+	right: 10px;
+	border-radius: 12px;
+}
+
+.scoreboard-teamname
+{
+	font-size: 30px;
+	font-family: "VT323", sans-serif;
+	background-color: #080808;
+	padding: 5px;
+}
+
+.scoreboard-teamname-red
+{
+	color: red;
+}
+
+.scoreboard-teamname-blue
+{
+	color: #2222ff;
+}
+
+.scoreboard-score
+{
+	width: 150px;
+	height: 150px;
+	position: absolute;
+	top: 35px;
+	text-align: center;
+}
+
+.scoreboard-score-red
+{
+	left: 30px;
+	background-color: #111;
+}
+
+.scoreboard-score-blue
+{
+	right: 30px;
+	background-color: #111;
+}
+
+.scoreboard-7seg
+{
+	font-family: "Segment7Standard";
+	font-size: 70px;
+	margin-top: 12px;
+}
+
+.scoreboard-7seg-red
+{
+	color: red;	
+}
+
+.scoreboard-7seg-blue
+{
+	color: #2222ff;
+}
+
+.scoreboard-countdown
+{
+	width: 350px;
+	height: 100px;
+	background-color: #111;
+	position: absolute;
+	bottom: 20px;
+	left: 90px;
+	color: #ff8;
+	font-size: 70px;
+	text-align: center;
+}
+.scoreboard-countdown-text
+{
+	margin-top: 14px;
+}
+
+.scoreboard-countdown-text-7seg
+{
+	font-family: "Segment7Standard";
+}
+
+.scoreboard-countdown-text-not7seg
+{
+	font-family: "Raleway", sans-serif;
+}
+
+.scoreboard-period
+{
+	position: absolute;
+	width: 70px;
+	height: 60px;
+	top: 50px;
+	left: 225px;
+	text-align: center;
+}
+
+.scoreboard-period-label
+{
+	color: white;
+	font-size: 18px;
+	font-family: "Raleway", sans-serif;
+}
+
+.scoreboard-period-number
+{
+	background-color: #111;
+	color: #ff8;
+	font-size: 40px;
+	font-family: "Segment7Standard";
+}
+
+
+		</style>
+	</head>
+	<body>
+
+
+		<div class="scoreboard">
+			<div class="scoreboard-borderinset">
+ 				<div class="scoreboard-score scoreboard-score-red">
+					<div class="scoreboard-teamname scoreboard-teamname-red" id="teamname-red">SPACES</div>
+					<div class="scoreboard-7seg scoreboard-7seg-red" id="score-red">99</div>
+				</div>
+				<div class="scoreboard-score scoreboard-score-blue">
+					<div class="scoreboard-teamname scoreboard-teamname-blue" id="teamname-blue">TABS</div>
+					<div class="scoreboard-7seg scoreboard-7seg-blue" id="score-blue">99</div>
+				</div>
+				<div class="scoreboard-countdown">
+					<div class="scoreboard-countdown-text">
+						<span class="scoreboard-countdown-text-7seg" id="clock-minutes">19</span>
+						<span class="scoreboard-countdown-text-not7seg">:</span>
+						<span class="scoreboard-countdown-text-7seg" id="clock-seconds">23</span>
+					</div>
+				</div>
+				<div class="scoreboard-period">
+					<div class="scoreboard-period-label">PERIOD</div>
+					<div class="scoreboard-period-number" id="period">3</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html> 

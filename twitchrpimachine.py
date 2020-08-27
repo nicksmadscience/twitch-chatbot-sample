@@ -73,6 +73,7 @@ from parse import compile
 import random
 import datetime
 import urllib2
+from oscpy.client import OSCClient
 
 # websockets
 import tornado.httpserver
@@ -116,7 +117,7 @@ led_onair    = 14
 # TODO: eventually what I wanna do is keep a record of everyone who triggered each event
 # (at least with the competing dog buttons) and how many times they did each thing
 
-count = {"red": 0, "blue": 0}
+count = {"red": 0, "blue": 0, "redteam": "ANGULAR", "blueteam": "REACT", "period": "1"}
 # countdown = {"active": False, "startTime": 0, "endTime": 0}
 
 countdown = countdownClass("none", 0, 0) # set initial timer to one that immediately expires
@@ -133,7 +134,7 @@ countdown = countdownClass("none", 0, 0) # set initial timer to one that immedia
 with open("count.json", "rb") as count_file:
     count = json.loads(count_file.read())
 
-print count
+print (count)
 
 
 
@@ -160,11 +161,44 @@ with open("secrets.json") as secrets_file:
 
 s=socket.socket( )
 s.connect((HOST, PORT))
-print "connected"
+print ("connected")
 s.send("PASS " + secrets["irc_oauth"] + "\r\n")
 s.send("NICK nicksmadscience\r\n")
 s.send("JOIN #nicksmadscience\r\n")
 
+
+
+
+####### OSC #######
+
+
+xr18 = OSCClient("10.0.0.99", 10024)
+
+
+
+
+def isRaiding(raiderName = "(unknown)"):
+    print ("isRaiding()")
+    turnOnRelay(relay_raidlight)
+    print ("turnOnRelay(relay_raidlight)")
+    turnOnRelay(relay_fogmachine)
+    print ("turnOnRelay(relay_fogmachine)")
+    requests.get("http://10.0.0.44:8081/preset/totd")
+    print ('requests.get("http://10.0.0.44:8081/preset/totd")')
+    requests.get("http://10.0.0.220:8081/titleplay/nms-raid-alert.html/%7B" + str(raiderName) + "%7D")
+    print ('requests.get("http://10.0.0.220:8081/titleplay/nms-raid-alert.html/%7B%' + str(raiderName) + '7D")')
+    requests.get("http://10.0.0.220:8081/videoplay/webm/alert-raid.webm/noloop")
+    print ('requests.get("http://10.0.0.220:8081/videoplay/webm/alert-raid.webm/noloop")')
+    time.sleep(5)
+    print ('time.sleep(5)')
+    turnOffRelay(relay_fogmachine)
+    print ('turnOffRelay(relay_fogmachine)')
+    time.sleep(10)
+    print ('time.sleep(10)')
+    turnOffRelay(relay_raidlight)
+    print ('turnOffRelay(relay_raidlight)')
+    requests.get("http://10.0.0.44:8081/preset/nms")
+    print ('requests.get("http://10.0.0.44:8081/preset/nms")')
 
 
 
@@ -214,12 +248,25 @@ def requestHandler_marquee(_get):
     """Initiate a scrolling marquee event."""
     global clients
 
-    print urllib2.unquote(_get[2])
+    print (urllib2.unquote(_get[2]))
 
     for client in clients:
         client.write_message(json.dumps({"messagetype": "marquee", "message": urllib2.unquote(_get[2])}))
 
     return "text/plain", str(_get)
+
+
+def requestHandler_isRaiding(get):
+    """Simulate a Twitch raid event."""
+    global clients
+
+    try:
+        isRaiding()
+
+    except Exception as e:
+        return "text/plain", traceback.format_exc(e)
+    else:
+        return "text/plain", "Started"
 
 
 # sample title requests to make
@@ -230,10 +277,6 @@ def requestHandler_marquee(_get):
 
 
 # TODO - ALERTS
-
-
-
-
 
 
 
@@ -288,6 +331,102 @@ def requestHandler_resetDogCounter(get):
 
 
 
+def requestHandler_spookymode(get):
+    global clients, xr18
+
+    try:
+        xr18.send_message("/fx/1/insert", [1.0])
+        xr18.send_message("/rtn/2/mix/fader", [0.4])
+        xr18.send_message("/rtn/3/mix/fader", [0.7])
+        xr18.send_message("/rtn/4/mix/fader", [0.6])
+
+        # requests.get("http://10.0.0.44:8081/preset/totd")
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+def requestHandler_notspookymode(get):
+    global clients, xr18
+
+    try:
+
+        xr18.send_message("/fx/1/insert", [0.0])
+        xr18.send_message("/rtn/2/mix/fader", [0.0])
+        xr18.send_message("/rtn/3/mix/fader", [0.0])
+        xr18.send_message("/rtn/4/mix/fader", [0.0])
+        # requests.get("http://10.0.0.44:8081/preset/nms")
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+def requestHandler_scene_startingsoonbrb(get):
+    try:
+        xr18.send_message("/ch/01/mix/fader", [0.75])
+        xr18.send_message("/ch/03/mix/fader", [0.75])
+        xr18.send_message("/ch/10/mix/fader", [0.0])
+        xr18.send_message("/ch/13/mix/fader", [0.0])
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+def requestHandler_scene_mics_on(get):
+    try:
+        xr18.send_message("/ch/01/mix/fader", [0.75])
+        xr18.send_message("/ch/03/mix/fader", [0.75])
+        xr18.send_message("/ch/10/mix/fader", [0.75])
+        xr18.send_message("/ch/13/mix/fader", [0.75])
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+def requestHandler_scene_farewell(get):
+    try:
+        xr18.send_message("/ch/01/mix/fader", [0.0])
+        xr18.send_message("/ch/03/mix/fader", [0.75])
+        xr18.send_message("/ch/10/mix/fader", [0.0])
+        xr18.send_message("/ch/13/mix/fader", [0.0])
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+def requestHandler_fog_on(get):
+    try:
+        turnOnRelay(relay_fogmachine)
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+
+def requestHandler_fog_off(get):
+    try:
+        turnOffRelay(relay_fogmachine)
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+
+
 # TODO: make capitalization consistent
 httpRequests = {'': requestHandler_index,
                 'count': requestHandler_count,
@@ -296,7 +435,15 @@ httpRequests = {'': requestHandler_index,
                 'marquee': requestHandler_marquee,
                 'titleplay': requestHandler_titlePlay,
                 'videoplay': requestHandler_videoPlay,
-                'resetdogcounter': requestHandler_resetDogCounter}
+                'resetdogcounter': requestHandler_resetDogCounter,
+                'spookymode': requestHandler_spookymode,
+                'notspookymode': requestHandler_notspookymode,
+                'scene_startingsoonbrb': requestHandler_scene_startingsoonbrb,
+                'scene_mics_on': requestHandler_scene_mics_on,
+                'scene_farewell': requestHandler_scene_farewell,
+                'fog_on': requestHandler_fog_on,
+                'fog_off': requestHandler_fog_off,
+                'isRaiding': requestHandler_isRaiding}
 
 
 
@@ -336,7 +483,7 @@ class myHandler(BaseHTTPRequestHandler):
 
 def http():
     server = HTTPServer(('', PORT_NUMBER), myHandler)
-    print 'Started httpserver on port ' , PORT_NUMBER
+    print ('Started httpserver on port ' , PORT_NUMBER)
 
     server.serve_forever()
 
@@ -366,9 +513,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     global clients, count, countdown
 
     def open(self):
-        print 'new connection'
+        print ('new connection')
         clients.append(self)
-        print clients
+        print (clients)
 
         # TODO: make a send-dog-button-count function
         # TODO: devise a system for data that needs to be sent on every new connection
@@ -377,7 +524,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
       
     def on_message(self, message):  # when the script receives a message from the web browser
-        print 'message received:  %s' % message
+        print ('message received:  %s' % message)
 
         if message == "sample message":
             # do sample thing
@@ -401,7 +548,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
  
     def on_close(self):
-        print 'connection closed'
+        print ('connection closed')
         clients.remove(self)
  
     def check_origin(self, origin):
@@ -415,7 +562,6 @@ application = tornado.web.Application([
 
  
 def socket():
-    print "*** socket ***"
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(6789)
     # myIP = socket.gethostbyname(socket.gethostname())
@@ -577,10 +723,10 @@ def turnOffLED(_relay):
 def on_message(ws, message):
     global serPort, count, clients
 
-    print message
+    print (message)
 
     if message.find("channel-bits-events") != -1:
-        print "OH HECK IT'S BITS O'CLOCK"
+        print ("OH HECK IT'S BITS O'CLOCK")
 
         if message.find(string.lower("Cheer100")) != -1:
             requests.get("http://10.0.0.4/attention")
@@ -595,31 +741,31 @@ def on_message(ws, message):
         turnOffLED(led_bits)
 
     elif message.find("c910a800-ecb3-4917-bab1-e47399dfd2d2") != -1:
-        print "OH HECK IT'S YELLOW STROBE TEST O'CLOCK"
+        print ("OH HECK IT'S YELLOW STROBE TEST O'CLOCK")
         turnOnRelay(relay_yellowlight)
         time.sleep(10)
         turnOffRelay(relay_yellowlight)
 
     elif message.find("77f991d8-a75c-4273-91b6-259e25009617") != -1:
-        print "OH HECK IT'S CHIME O'CLOCK"
+        print ("OH HECK IT'S CHIME O'CLOCK")
         turnOnRelay(relay_chime)
         time.sleep(0.5)
         turnOffRelay(relay_chime)
 
     elif message.find("6dcaa344-0bae-40f8-b2ff-baa3ace98cd3") != -1:
-        print "OH HECK IT'S FOG O'CLOCK"
+        print ("OH HECK IT'S FOG O'CLOCK")
         turnOnRelay(relay_fogmachine)
         time.sleep(5)
         turnOffRelay(relay_fogmachine)
 
     elif message.find("723006a2-3caf-4a6a-9aff-3dbe94231d41") != -1:
-        print "OH HECK IT'S RED LIGHT TEST O'CLOCK"
+        print ("OH HECK IT'S RED LIGHT TEST O'CLOCK")
         turnOnRelay(relay_redlight)
         time.sleep(5)
         turnOffRelay(relay_redlight)
 
     elif message.find("channel-subscribe-events") != -1:
-        print "OH HECK IT'S SUBSCRIBER O'CLOCK"
+        print ("OH HECK IT'S SUBSCRIBER O'CLOCK")
         turnOnRelay(relay_redlight)
         turnOnLED(led_raid)
         turnOnRelay(relay_fogmachine)
@@ -629,7 +775,7 @@ def on_message(ws, message):
         turnOffRelay(relay_fogmachine)
 
     elif message.find("1f1bc054-a48f-418b-b148-bfe14580bb4b") != -1:
-        print "OH HECK IT'S BLUE BUTTON A O'CLOCK"
+        print ("OH HECK IT'S BLUE BUTTON A O'CLOCK")
         count["blue"] += 1
         print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
         try:
@@ -644,7 +790,7 @@ def on_message(ws, message):
             count_file.write(json.dumps(count))
 
     elif message.find("a015be4f-c7ff-4a27-b519-414a4afc02a1") != -1:
-        print "OH HECK IT'S RED BUTTON B O'CLOCK"
+        print ("OH HECK IT'S RED BUTTON B O'CLOCK")
         count["red"] += 1
         print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
         try:
@@ -664,7 +810,7 @@ def on_error(ws, error):
     pprint.pprint(json.loads(error))
 
 def on_close(ws):
-    print "### closed ###"
+    print ("### closed ###")
 
 def on_open(ws):
     def run(*args):
@@ -679,7 +825,7 @@ def on_open(ws):
             # ws.send("Hello %d" % i)
         # time.sleep(1)
         # ws.close()
-        print "thread terminating..."
+        print ("thread terminating...")
     thread.start_new_thread(run, ())
 
 
@@ -724,7 +870,6 @@ def wsRunForever():
 wsRunForeverThread = Thread(target=wsRunForever)  # TODO: this could be a function
 wsRunForeverThread.daemon = True
 wsRunForeverThread.start()
-
 
 
 
@@ -791,16 +936,13 @@ while go:
 
                 # TODO: obviously, screen to make sure this is coming from an authorized account
                 elif message.find("is raiding") != -1:
-                    print ("OMFG RAIDZ")
-                    turnOnRelay(relay_raidlight)
-                    turnOnRelay(relay_fogmachine)
-                    requests.get("http://10.0.0.44:8081/preset/totd")
-                    requests.get("http://10.0.0.220:8081/titleplay/nms-raidalert.html/%7B%7D")
-                    time.sleep(10)
-                    turnOffRelay(relay_fogmachine)
-                    time.sleep(10)
-                    turnOffRelay(relay_raidlight)
-                    requests.get("http://10.0.0.44:8081/preset/nms")
+
+                    try:
+                        isRaiding(message.split(" ")[0])
+                    except:
+                        traceback.print_exc()
+                        isRaiding()
+
                 elif message.find("Thank you for following") != -1:
                     print ("OMFG NEW FOLLOWER")
                     turnOnRelay(relay_bluelight)
