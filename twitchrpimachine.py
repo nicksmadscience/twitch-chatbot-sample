@@ -178,27 +178,68 @@ xr18 = OSCClient("10.0.0.99", 10024)
 
 
 def isRaiding(raiderName = "(unknown)"):
-    print ("isRaiding()")
-    turnOnRelay(relay_raidlight)
-    print ("turnOnRelay(relay_raidlight)")
-    turnOnRelay(relay_fogmachine)
-    print ("turnOnRelay(relay_fogmachine)")
-    requests.get("http://10.0.0.44:8081/preset/totd")
-    print ('requests.get("http://10.0.0.44:8081/preset/totd")')
-    requests.get("http://10.0.0.220:8081/titleplay/nms-raid-alert.html/%7B" + str(raiderName) + "%7D")
-    print ('requests.get("http://10.0.0.220:8081/titleplay/nms-raid-alert.html/%7B%' + str(raiderName) + '7D")')
-    requests.get("http://10.0.0.220:8081/videoplay/webm/alert-raid.webm/noloop")
-    print ('requests.get("http://10.0.0.220:8081/videoplay/webm/alert-raid.webm/noloop")')
-    time.sleep(5)
-    print ('time.sleep(5)')
+    try:
+        turnOnRelay(relay_raidlight)
+        print ("a")
+    except:
+        traceback.print_exc()
+
+    try:
+        turnOnRelay(relay_fogmachine)
+        print ("b")
+    except:
+        traceback.print_exc()
+
+    try:
+        requests.get("http://10.0.0.44:8081/preset/totd")
+        print ("c")
+    except:
+        traceback.print_exc()
+
+    try:
+        requests.get("http://10.0.0.220:8081/titleplay/nms-raid-alert.html/{\"raidernameHandler\": \"" + str(raiderName) + "\"}/theripper")
+        print ("d")
+    except:
+        traceback.print_exc()
+
+    try:
+        requests.get("http://10.0.0.220:8081/videoplay/webm/alert-raid.webm/noloop/theripper")
+        print ("e")
+    except:
+        traceback.print_exc()
+
+    try:
+        requests.get("http://10.0.0.220:8081/videoplay/webm/alert-raid-fullscreen.webm/noloop/nc1in")
+        print ("f")
+    except:
+        traceback.print_exc()
+
+    try:
+        time.sleep(5)
+        print ("g")
+    except:
+        traceback.print_exc()
+
     turnOffRelay(relay_fogmachine)
-    print ('turnOffRelay(relay_fogmachine)')
-    time.sleep(10)
-    print ('time.sleep(10)')
-    turnOffRelay(relay_raidlight)
-    print ('turnOffRelay(relay_raidlight)')
-    requests.get("http://10.0.0.44:8081/preset/nms")
-    print ('requests.get("http://10.0.0.44:8081/preset/nms")')
+    try:
+        print ("h")
+        time.sleep(10)
+    except:
+        traceback.print_exc()
+
+    try:
+        print ("i")
+        turnOffRelay(relay_raidlight)
+    except:
+        traceback.print_exc()
+
+    try:
+        print ("j")
+        requests.get("http://10.0.0.44:8081/preset/nms")
+    except:
+        traceback.print_exc()
+
+    print ("k")
 
 
 
@@ -256,12 +297,13 @@ def requestHandler_marquee(_get):
     return "text/plain", str(_get)
 
 
-def requestHandler_isRaiding(get):
+def requestHandler_RaidSimulator(get):
     """Simulate a Twitch raid event."""
     global clients
 
     try:
-        isRaiding()
+        print("******* OKAY this is the part where I'm calling isRaiding from the HTTP GET raid simulator!")
+        isRaiding("(test)")
 
     except Exception as e:
         return "text/plain", traceback.format_exc(e)
@@ -287,7 +329,7 @@ def requestHandler_titlePlay(get):
 
     try:
         for client in clients:
-            client.write_message(json.dumps({"messagetype": "titleplay", "url": get[2], "message": urllib2.unquote(get[3])}))
+            client.write_message(json.dumps({"messagetype": "titleplay", "url": get[2], "message": urllib2.unquote(get[3]), "instance": get[4]}))
     except:
         return "text/plain", traceback.format_exc()
     else:
@@ -303,11 +345,28 @@ def requestHandler_videoPlay(get):
     # TODO: once again, more DRY-related issues here
     try:
         for client in clients:
-            client.write_message(json.dumps({"messagetype": "videoplay", "type": get[2], "url": get[3], "looping": get[4]}))
+            client.write_message(json.dumps({"messagetype": "videoplay", "type": get[2], "url": get[3], "looping": get[4], "instance": get[5]}))
     except:
         return "text/plain", traceback.format_exc()
     else:
         return "text/plain", "ok"
+
+
+
+def requestHandler_dogtrick(get):
+    """Tell dogtrickplayer to issue a verbal command to Mouse."""
+
+    global clients
+
+    # TODO: once again, more DRY-related issues here
+    try:
+        for client in clients:
+            client.write_message(json.dumps({"messagetype": "dogtrick", "trick": get[2]}))
+    except:
+        return "text/plain", traceback.format_exc()
+    else:
+        return "text/plain", "ok"
+
 
 
 
@@ -426,6 +485,44 @@ def requestHandler_fog_off(get):
 
 
 
+def requestHandler_all_strobes_on(get):
+    try:
+        turnOnRelay(relay_raidlight)
+        turnOnRelay(relay_redlight)
+        turnOnRelay(relay_yellowlight)
+        turnOnRelay(relay_bluelight)
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+
+def requestHandler_all_strobes_off(get):
+    try:
+        turnOffRelay(relay_raidlight)
+        turnOffRelay(relay_redlight)
+        turnOffRelay(relay_yellowlight)
+        turnOffRelay(relay_bluelight)
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
+
+def requestHandler_showtime(get):
+    try:
+        # bleh
+
+    except:
+        return "text/plain", traceback.write_exc()
+    else:
+        return "text/plain", "ok"
+
+
 
 # TODO: make capitalization consistent
 httpRequests = {'': requestHandler_index,
@@ -443,7 +540,11 @@ httpRequests = {'': requestHandler_index,
                 'scene_farewell': requestHandler_scene_farewell,
                 'fog_on': requestHandler_fog_on,
                 'fog_off': requestHandler_fog_off,
-                'isRaiding': requestHandler_isRaiding}
+                'all_strobes_on': requestHandler_all_strobes_on,
+                'all_strobes_off': requestHandler_all_strobes_off,
+                'RaidSimulator': requestHandler_RaidSimulator,
+                'dogtrick': requestHandler_dogtrick,
+                'showtime': requestHandler_showtime,}
 
 
 
@@ -729,9 +830,13 @@ def on_message(ws, message):
         print ("OH HECK IT'S BITS O'CLOCK")
 
         if message.find(string.lower("Cheer100")) != -1:
+            print ("Cheer100 confirmed")
             requests.get("http://10.0.0.4/attention")
         elif message.find(string.lower("Cheer101")) != -1:
+            print ("Cheer101 confirmed")
             requests.get("http://10.0.0.5/attention")
+        else:
+            print ("No bit alerts found")
 
 
         turnOnRelay(relay_yellowlight)
@@ -789,6 +894,13 @@ def on_message(ws, message):
         with open("count.json", "wb") as count_file:
             count_file.write(json.dumps(count))
 
+        teamName = count["blueteam"]
+        score = count["blue"]
+
+        requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
+        requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
+
+
     elif message.find("a015be4f-c7ff-4a27-b519-414a4afc02a1") != -1:
         print ("OH HECK IT'S RED BUTTON B O'CLOCK")
         count["red"] += 1
@@ -803,6 +915,12 @@ def on_message(ws, message):
 
         with open("count.json", "wb") as count_file:
             count_file.write(json.dumps(count))
+
+        teamName = count["redteam"]
+        score = count["red"]
+
+        requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
+        requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
 
 
 
@@ -935,16 +1053,19 @@ while go:
 
 
                 # TODO: obviously, screen to make sure this is coming from an authorized account
-                elif message.find("is raiding") != -1:
+                elif message.find("is raiding the channel") != -1:
 
                     try:
+                        print("******* OKAY this is the part where I'm calling isRaiding because I saw \"is raiding\" in chat!")
                         isRaiding(message.split(" ")[0])
                     except:
                         traceback.print_exc()
-                        isRaiding()
+                        isRaiding("(exception)")
 
                 elif message.find("Thank you for following") != -1:
                     print ("OMFG NEW FOLLOWER")
+                    requests.get("http://10.0.0.220:8081/videoplay/webm/alert-new-follower-optimized.webm/noloop/theripper")
+                    requests.get("http://10.0.0.220:8081/titleplay/nms-lower-third.html/{'textHandler': '" + message + "'}/theripper")
                     turnOnRelay(relay_bluelight)
                     time.sleep(5)
                     turnOffRelay(relay_bluelight)

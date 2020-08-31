@@ -1,0 +1,93 @@
+<html>
+	<head>
+		<title>HTTP GET Shot Box</title>
+		<style type="text/css">
+
+body
+{
+	background-color: #aaa;
+}
+
+.shotboxsection
+{
+	background-color: white;
+	padding: 10px;
+	margin: 10px;
+}
+
+		</style>
+		<script type="text/javascript">
+
+var xmlhttp;
+function loadXMLDoc(url)
+{
+    if (window.XMLHttpRequest)
+          xmlhttp=new XMLHttpRequest();  // code for IE7+, Firefox, Chrome, Opera, Safari
+
+    xmlhttp.open("GET",url,true);
+    xmlhttp.send();
+}
+
+function run(textarea)
+{
+	var url = document.getElementById(textarea).value;
+	loadXMLDoc(url);
+}
+
+// http://10.0.0.220:8081/titleplay/nms-generic-cta.html/{"textBoxUpdater": "Don&apos;t worry, we&apos;re not overfeeding or underfeeding my pup!  His reward is regular dog kibble, and I adjust the size of his meals accordingly."}
+
+		</script>
+	</head>
+	<body>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox1-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox1-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox2-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox2-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox3-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox3-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox4-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox4-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox5-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox5-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox6-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox6-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox7-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox7-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox8-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox8-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox9-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox9-command')">GO</button>
+		</div>
+		<div class="shotboxsection">
+			<input type="text" id="shotbox1-name" value="Name" />
+			<textarea id="shotbox10-command" rows="4" cols="80"></textarea>
+			<button onclick="run('shotbox10-command')">GO</button>
+		</div>
+	</body>
+</html>

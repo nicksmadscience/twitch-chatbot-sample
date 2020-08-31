@@ -8,7 +8,7 @@
 
 body
 {
-	background-color: none transparent;
+	background: none transparent;
 	width: 1920px;
 	height: 1080px;
 	margin: 0;
@@ -24,7 +24,7 @@ body
 	left: 0;
 	margin: 0;
 	padding: 0;
-	z-index: 1000;
+	z-index: -1000;
 }
 
 
@@ -37,8 +37,39 @@ body
 	padding: 0;
 }
 
+#titleholder
+{
+	z-index: 1000;
+}
+
 		</style>
 		<script type="text/javascript">
+
+// stolen from https://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
+function findGetParameter(parameterName) {
+    var result = null,
+        tmp = [];
+    location.search
+        .substr(1)
+        .split("&")
+        .forEach(function (item) {
+          tmp = item.split("=");
+          if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+        });
+    return result;
+}
+
+
+// var instance = "all";
+
+var instance = findGetParameter("instance");
+if (instance == null)
+	instance = "all";
+
+console.log("instance: " + instance.toString());
+
+
+
 
 
 
@@ -80,47 +111,55 @@ function newWebsocket()
 
 	    if (messageType == "titleplay")
 	    {
-	    	var titleholder = document.getElementById("titleholder");
-
-	    	
-	    	titleholder.src = websocketMessage_array["url"];
-	    	console.log("titleholder url: " + titleholder.src);
-
-	    	titleholder.onload = function()
+	    	if ((websocketMessage_array["instance"] == instance) || (websocketMessage_array["instance"] == "all"))
 	    	{
-	    		// update all the fields
-	    		var fields = JSON.parse(websocketMessage_array["message"]);
-	    		console.log(fields);
-	    		console.log(fields.length);
+	    		var titleholder = document.getElementById("titleholder");
 
-				for (var key in fields)
-				{
-				    if (fields.hasOwnProperty(key))
-				    {
-				        console.log(key + " -> " + fields[key]);
-				        titleholder.contentWindow.eval(key + "('" + fields[key] + "')");
-				    }
+		    	
+		    	titleholder.src = websocketMessage_array["url"];
+		    	titleholder.contentWindow.location.href = titleholder.src;
+		    	console.log("titleholder url: " + titleholder.src);
+
+		    	titleholder.onload = function()
+		    	{
+		    		// update all the fields
+		    		var fields = JSON.parse(websocketMessage_array["message"]);
+		    		console.log(fields);
+		    		console.log(fields.length);
+
+					for (var key in fields)
+					{
+					    if (fields.hasOwnProperty(key))
+					    {
+					        console.log(key + " -> " + fields[key]);
+					        titleholder.contentWindow.eval(key + "('" + fields[key] + "')");
+					    }
+					}
+
+					titleholder.contentWindow.playAnimation();
 				}
-
-				titleholder.contentWindow.playAnimation();
-			}
+	    	}
+	    	
 	    }
 	    else if (messageType == "videoplay")
 	    {
-	    	var fullscreenvideoplayer = document.getElementById("fullscreenvideoplayer");
-        	var fullscreenvideoplayersource = document.getElementById("fullscreenvideoplayer-source");
+	    	if ((websocketMessage_array["instance"] == instance) || (websocketMessage_array["instance"] == "all"))
+	    	{
+		    	var fullscreenvideoplayer = document.getElementById("fullscreenvideoplayer");
+	        	var fullscreenvideoplayersource = document.getElementById("fullscreenvideoplayer-source");
 
 
-        	fullscreenvideoplayersource.src = websocketMessage_array["url"];
-        	fullscreenvideoplayer.load();
+	        	fullscreenvideoplayersource.src = websocketMessage_array["url"];
+	        	fullscreenvideoplayer.load();
 
-        	if (websocketMessage_array["looping"] == "looping")
-        		fullscreenvideoplayer.loop = true;
-        	else
-        		fullscreenvideoplayer.loop = false;
+	        	if (websocketMessage_array["looping"] == "looping")
+	        		fullscreenvideoplayer.loop = true;
+	        	else
+	        		fullscreenvideoplayer.loop = false;
 
-        	fullscreenvideoplayer.currentTime = 0;
-        	fullscreenvideoplayer.play();
+	        	fullscreenvideoplayer.currentTime = 0;
+	        	fullscreenvideoplayer.play();
+	        }
 	    }
     }
 }
@@ -139,5 +178,7 @@ window.onload = function()
 		<video id="fullscreenvideoplayer" width="1920" height="1080" autoplay>
 			<source id="fullscreenvideoplayer-source">
 		</video>
+		
+		
 	</body>
 </html>
