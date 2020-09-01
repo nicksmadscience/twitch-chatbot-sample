@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<title>Doggy scoreboard controller!</title>
+		<style type="text/css">
+
+.scoreboard-section
+{
+	background-color: #eee;
+	display: block;
+	padding: 1em;
+	margin: 1em;
+}
+
+.scoreboard-subsection
+{
+	background-color: #ccc;
+	display: inline-block;
+	padding: 1em;
+	margin: 1em;
+}
+
+		</style>
+		<script type="text/javascript">
+
+
+
+		</script>
+	</head>
+	<body>
+		<h1>Scoreboard controller!</h1>
+		<div class="scoreboard-section">
+			<label for="period">Period</label>
+			<input type="text" id="period">
+			<button id="redscore-up">+</button>
+			<button id="redscore-down">-</button>
+		</div>
+
+		<div class="scoreboard-section">
+			<div class="scoreboard-subsection">
+				<label for="redname">Red Team Name</label>
+				<input type="text" id="redname">
+			</div>
+			<div class="scoreboard-subsection">
+				<label for="redscore">Red Score</label>
+				<input type="text" id="redscore">
+				<button id="redscore-up">+</button>
+				<button id="redscore-down">-</button>
+			</div>
+		</div>
+
+		<div class="scoreboard-section">
+			<div class="scoreboard-subsection">
+				<label for="bluename">Blue Team Name</label>
+				<input type="text" id="bluename">
+			</div>
+			<div class="scoreboard-subsection">
+				<label for="bluescore">Blue Score</label>
+				<input type="text" id="bluescore">
+				<button id="redscore-up">+</button>
+				<button id="redscore-down">-</button>
+			</div>
+		</div>
+
+		<div class="scoreboard-section">
+			<div class="scoreboard-subsection">
+				<label for="timerentry-minutes">Timer Entry (Minutes)</label>
+				<input type="text" id="timerentry-minutes">
+			</div>
+			<div class="scoreboard-subsection">
+				<label for="timerentry-seconds">Timer Entry (Seconds)</label>
+				<input type="text" id="timerentry-seconds">
+			</div>
+			<div class="scoreboard-subsection">
+				<button id="timerstart">Start</button>
+				<button id="timerstop">Stop</button>
+			</div>
+		</div>
+	</body>
+</html>
+
+		
