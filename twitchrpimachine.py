@@ -513,14 +513,14 @@ def requestHandler_all_strobes_off(get):
 
 
 
-def requestHandler_showtime(get):
-    try:
-        # bleh
+# def requestHandler_showtime(get):
+#     try:
+#         # bleh
 
-    except:
-        return "text/plain", traceback.write_exc()
-    else:
-        return "text/plain", "ok"
+#     except:
+#         return "text/plain", traceback.write_exc()
+#     else:
+#         return "text/plain", "ok"
 
 
 
@@ -543,8 +543,7 @@ httpRequests = {'': requestHandler_index,
                 'all_strobes_on': requestHandler_all_strobes_on,
                 'all_strobes_off': requestHandler_all_strobes_off,
                 'RaidSimulator': requestHandler_RaidSimulator,
-                'dogtrick': requestHandler_dogtrick,
-                'showtime': requestHandler_showtime,}
+                'dogtrick': requestHandler_dogtrick}
 
 
 
@@ -821,18 +820,58 @@ def turnOffLED(_relay):
 
 
 
-def on_message(ws, message):
+def on_message(ws, message_json):
     global serPort, count, clients
 
-    print (message)
+    print (message_json)
 
-    if message.find("channel-bits-events") != -1:
+    message = json.loads(message_json)
+
+    if message_json.find("channel-bits-events") != -1:
         print ("OH HECK IT'S BITS O'CLOCK")
 
-        if message.find(string.lower("Cheer100")) != -1:
+        requests.get("http://10.0.0.220:8081/videoplay/webm/alert-cheer-optimized.webm/noloop/theripper")
+
+
+
+        print ("test 1")
+        try:
+            print ("message: " + str(message))
+        except:
+            traceback.print_exc()
+
+        print ("test 2")
+        try:
+            print ("message[\"data\"]: " + str(message["data"]))
+        except:
+            traceback.print_exc()
+
+        print ("test 3")
+        try:
+            print ("message[\"data\"][\"message\"]: " + str(message["data"]["message"]))
+        except:
+            traceback.print_exc()
+
+        print ("test 4")
+        try:
+            messageInMessage = json.loads(message["data"]["message"])
+            subscriberMessage = "Thanks for the bits, " + messageInMessage["user_name"] + "!"
+        except:
+            traceback.print_exc()
+            subscriberMessage = "Thanks for the bits!"
+
+        print ("test 1")
+        try:
+            messageInMessage = json.loads(message["data"]["message"].replace("\\", ""))
+        except:
+            traceback.print_exc()
+
+        # {"type":"MESSAGE","data":{"topic":"channel-bits-events-v2.105293178","message":"{\"data\":{\"user_name\":\"misscocoderp\",\"channel_name\":\"nicksmadscience\",\"user_id\":\"91256946\",\"channel_id\":\"105293178\",\"time\":\"2020-09-01T19:22:28.308448802Z\",\"chat_message\":\"Cheer1 Cheer1 test\",\"bits_used\":2,\"total_bits_used\":2,\"is_anonymous\":false,\"context\":\"cheer\",\"badge_entitlement\":{\"new_version\":1,\"previous_version\":0}},\"version\":\"1.0\",\"message_type\":\"bits_event\",\"message_id\":\"44653b0f-e601-57ae-a89f-6eb0cfc972a8\"}"}}
+
+        if message_json.find(string.lower("Cheer100")) != -1:
             print ("Cheer100 confirmed")
             requests.get("http://10.0.0.4/attention")
-        elif message.find(string.lower("Cheer101")) != -1:
+        elif message_json.find(string.lower("Cheer101")) != -1:
             print ("Cheer101 confirmed")
             requests.get("http://10.0.0.5/attention")
         else:
@@ -845,41 +884,57 @@ def on_message(ws, message):
         turnOffRelay(relay_yellowlight)
         turnOffLED(led_bits)
 
-    elif message.find("c910a800-ecb3-4917-bab1-e47399dfd2d2") != -1:
+    elif message_json.find("c910a800-ecb3-4917-bab1-e47399dfd2d2") != -1:
         print ("OH HECK IT'S YELLOW STROBE TEST O'CLOCK")
         turnOnRelay(relay_yellowlight)
         time.sleep(10)
         turnOffRelay(relay_yellowlight)
 
-    elif message.find("77f991d8-a75c-4273-91b6-259e25009617") != -1:
+    elif message_json.find("77f991d8-a75c-4273-91b6-259e25009617") != -1:
         print ("OH HECK IT'S CHIME O'CLOCK")
         turnOnRelay(relay_chime)
         time.sleep(0.5)
         turnOffRelay(relay_chime)
 
-    elif message.find("6dcaa344-0bae-40f8-b2ff-baa3ace98cd3") != -1:
+    elif message_json.find("6dcaa344-0bae-40f8-b2ff-baa3ace98cd3") != -1:
         print ("OH HECK IT'S FOG O'CLOCK")
         turnOnRelay(relay_fogmachine)
         time.sleep(5)
         turnOffRelay(relay_fogmachine)
 
-    elif message.find("723006a2-3caf-4a6a-9aff-3dbe94231d41") != -1:
+    elif message_json.find("723006a2-3caf-4a6a-9aff-3dbe94231d41") != -1:
         print ("OH HECK IT'S RED LIGHT TEST O'CLOCK")
         turnOnRelay(relay_redlight)
         time.sleep(5)
         turnOffRelay(relay_redlight)
 
-    elif message.find("channel-subscribe-events") != -1:
+# {"type":"MESSAGE","data":{"topic":"channel-subscribe-events-v1.105293178","message":"{\"benefit_end_month\":10,\"user_name\":\"misscocoderp\",\"display_name\":\"MissCocoDerp\",\"channel_name\":\"nicksmadscience\",\"user_id\":\"91256946\",\"channel_id\":\"105293178\",\"time\":\"2020-09-01T18:35:37.040205227Z\",\"sub_message\":{\"message\":\"\",\"emotes\":null},\"sub_plan\":\"1000\",\"sub_plan_name\":\"Channel Subscription (nicksmadscience)\",\"months\":0,\"cumulative_months\":1,\"context\":\"sub\",\"is_gift\":false,\"multi_month_duration\":0}"}}
+
+    elif message_json.find("channel-subscribe-events") != -1:
+
+        try:
+            messageInMessage = json.loads(message["data"]["message"])
+            subscriberMessage = messageInMessage["user_name"] + " has subscribed!"
+        except:
+            traceback.print_exc()
+            subscriberMessage = "Thanks for subscribing!"
+
         print ("OH HECK IT'S SUBSCRIBER O'CLOCK")
         turnOnRelay(relay_redlight)
         turnOnLED(led_raid)
         turnOnRelay(relay_fogmachine)
+
+        requests.get("http://10.0.0.220:8081/titleplay/nms-lower-third.html/{\"textHandler\": \"" + subscriberMessage + "\"}/theripper")
+        requests.get("http://10.0.0.220:8081/videoplay/webm/alert-new-subscriber.webm/noloop/theripper")
+
         time.sleep(5)
         turnOffRelay(relay_redlight)
         turnOffLED(led_raid)
         turnOffRelay(relay_fogmachine)
 
-    elif message.find("1f1bc054-a48f-418b-b148-bfe14580bb4b") != -1:
+        # eventHandler("new subscriber", "subscriber name")
+
+    elif message_json.find("1f1bc054-a48f-418b-b148-bfe14580bb4b") != -1:
         print ("OH HECK IT'S BLUE BUTTON A O'CLOCK")
         count["blue"] += 1
         print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
@@ -901,7 +956,7 @@ def on_message(ws, message):
         requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
 
 
-    elif message.find("a015be4f-c7ff-4a27-b519-414a4afc02a1") != -1:
+    elif message_json.find("a015be4f-c7ff-4a27-b519-414a4afc02a1") != -1:
         print ("OH HECK IT'S RED BUTTON B O'CLOCK")
         count["red"] += 1
         print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
@@ -919,8 +974,20 @@ def on_message(ws, message):
         teamName = count["redteam"]
         score = count["red"]
 
+        # TODO: could there be a more direct way than the script calling its own webserver?
         requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
         requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
+
+    elif message_json.find("a95fcc52-8ed9-4f47-93ff-07749826da39") != -1:
+        print ("OH HECK IT'S YELLOW BUTTON B O'CLOCK")
+
+        requests.get("http://10.0.0.220:8081/titleplay/nms-feedthatpup.html/{}/theripper")
+
+        try:
+            requests.get("http://10.0.0.3/attention")
+        except Exception as e:
+            traceback.print_exc(e)
+     
 
 
 
@@ -1048,27 +1115,37 @@ while go:
                 for client in clients:
                     client.write_message(line)
 
+                # {"type":"MESSAGE","data":{"topic":"channel-bits-events-v2.105293178","message":"{\"data\":{\"user_name\":\"misscocoderp\",\"channel_name\":\"nicksmadscience\",\"user_id\":\"91256946\",\"channel_id\":\"105293178\",\"time\":\"2020-09-01T19:22:28.308448802Z\",\"chat_message\":\"Cheer1 Cheer1 test\",\"bits_used\":2,\"total_bits_used\":2,\"is_anonymous\":false,\"context\":\"cheer\",\"badge_entitlement\":{\"new_version\":1,\"previous_version\":0}},\"version\":\"1.0\",\"message_type\":\"bits_event\",\"message_id\":\"44653b0f-e601-57ae-a89f-6eb0cfc972a8\"}"}}
+
                 if message[0:5].lower() == "cheer" or message[0:5].lower() == "corgo" or message[0:5] == "Butts":
                     print ("OMFG CHEER")
+                    # Don't actually need to handle this here because I've got PubSub
 
 
                 # TODO: obviously, screen to make sure this is coming from an authorized account
-                elif message.find("is raiding the channel") != -1:
 
-                    try:
-                        print("******* OKAY this is the part where I'm calling isRaiding because I saw \"is raiding\" in chat!")
-                        isRaiding(message.split(" ")[0])
-                    except:
-                        traceback.print_exc()
-                        isRaiding("(exception)")
+                # TODO: there appears to be a "real" way to do this in IRC if enabled
+                elif message.find("is raiding the channel") != -1:
+                    if username == "nicksmadscience" or username == "streamelements":
+                        try:
+                            print("******* OKAY this is the part where I'm calling isRaiding because I saw \"is raiding\" in chat!")
+                            isRaiding(message.split(" ")[0])
+                        except:
+                            traceback.print_exc()
+                            isRaiding("(exception)")
+                    else:
+                        print "found text but username wasn't authorized (" + str(username) + ")"
 
                 elif message.find("Thank you for following") != -1:
-                    print ("OMFG NEW FOLLOWER")
-                    requests.get("http://10.0.0.220:8081/videoplay/webm/alert-new-follower-optimized.webm/noloop/theripper")
-                    requests.get("http://10.0.0.220:8081/titleplay/nms-lower-third.html/{'textHandler': '" + message + "'}/theripper")
-                    turnOnRelay(relay_bluelight)
-                    time.sleep(5)
-                    turnOffRelay(relay_bluelight)
+                    if username == "nicksmadscience" or username == "streamelements":
+                        print ("OMFG NEW FOLLOWER")
+                        requests.get("http://10.0.0.220:8081/videoplay/webm/alert-new-follower-optimized.webm/noloop/theripper")
+                        requests.get("http://10.0.0.220:8081/titleplay/nms-lower-third.html/{\"textHandler\": \"" + message + "\"}/theripper")
+                        turnOnRelay(relay_bluelight)
+                        time.sleep(5)
+                        turnOffRelay(relay_bluelight)
+                    else:
+                        print "found text but username wasn't authorized (" + str(username) + ")"
 
 
             # else:
@@ -1078,8 +1155,8 @@ while go:
             # print (line)
 
 
-            # with open("chatlog.txt", "ab") as chatlog_file:
-                # chatlog_file.write(line + "\n")
+            with open("chatlog.txt", "ab") as chatlog_file:
+                chatlog_file.write(line + "\n")
 
     except KeyboardInterrupt:
         go = False
