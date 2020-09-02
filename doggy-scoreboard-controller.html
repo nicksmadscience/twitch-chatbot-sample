@@ -3,12 +3,20 @@
 		<title>Doggy scoreboard controller!</title>
 		<style type="text/css">
 
+@import url('https://fonts.googleapis.com/css?family=VT323');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@600&display=swap');
+
+body
+{
+	font-family: "Raleway", sans-serif;
+}
+
 .scoreboard-section
 {
 	background-color: #eee;
 	display: block;
-	padding: 1em;
-	margin: 1em;
+	padding: 0.5em;
+	margin: 0.5em;
 }
 
 .scoreboard-subsection
@@ -19,9 +27,117 @@
 	margin: 1em;
 }
 
+.shortinput
+{
+	width: 3em;
+}
+
+
+.currentvalue
+{
+	font-size: 2em;
+	/*font-weight: bold;*/
+	margin-left: .3em;
+	margin-right: .3em;
+	background-color: white;
+	font-family: "VT323";
+	padding: 6px;
+	color: black;
+}
+
+.currentvalue-red
+{
+	color: #f22;
+}
+
+.currentvalue-blue
+{
+	color: #22f;
+}
+
+.currentvalue-yellow
+{
+	color: #880;
+}
+
+
+
+
 		</style>
 		<script type="text/javascript">
 
+
+function newWebsocket()
+{
+    console.log("new websocket");
+    s = new WebSocket("ws://10.0.0.220:6789/ws");
+
+    s.onopen = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-notconnected"))
+        //     status.classList.replace("status-notconnected", "status-connected")
+        // status.innerHTML = "Connected";
+        console.log("opened");
+        // document.getElementById("websocketstatus").classList.remove("notconnected");
+    }
+    
+    s.onclose = function(e)
+    {
+        // var status = document.getElementById("status")
+        // if (status.classList.contains("status-connected"))
+        //     status.classList.replace("status-connected", "status-notconnected")
+        // status.innerHTML = "Not Connected";
+        console.log("closed");
+        // document.getElementById("websocketstatus").classList.add("notconnected");
+
+        setTimeout(function() { newWebsocket(); }, 3000);
+    }
+    
+    s.onmessage = function(e)
+    {
+        console.log(e.data);
+        var websocketMessage_array = JSON.parse(e.data);
+
+        var messageType = websocketMessage_array["messagetype"];
+
+
+	    if (messageType == "dogbutton")
+	    {
+	    	// TODO: error handler
+	    	document.getElementById("redscore-value").innerHTML = websocketMessage_array["count"]["red"];
+	    	document.getElementById("bluescore-value").innerHTML = websocketMessage_array["count"]["blue"];
+	    	document.getElementById("period-value").innerHTML = websocketMessage_array["count"]["period"];
+	    	document.getElementById("redname-value").innerHTML = websocketMessage_array["count"]["redteam"];
+	    	document.getElementById("bluename-value").innerHTML = websocketMessage_array["count"]["blueteam"];
+	    }
+	    else if (messageType == "countdown")
+	    {
+	    	console.log(websocketMessage_array["timeLeft"]);
+
+	    	var countdownSplit = websocketMessage_array["timeLeft"].split(":");
+	    	document.getElementById("minutes-value").innerHTML = countdownSplit[0];
+	    	document.getElementById("seconds-value").innerHTML = countdownSplit[1];
+	    }
+
+    }
+}
+
+// Looks for the element named *id*, grabs its value, and sends said value
+// to twitchrpimachine etc. via websocket with the *key* string as the... thing to change.
+function sendWebsocketSetting(key, id)
+{
+	var element = document.getElementById(id);
+
+	s.send('forward5')
+}
+
+
+
+window.onload = function()
+{
+    newWebsocket();
+}
 
 
 		</script>
@@ -29,20 +145,28 @@
 	<body>
 		<h1>Scoreboard controller!</h1>
 		<div class="scoreboard-section">
-			<label for="period">Period</label>
-			<input type="text" id="period">
-			<button id="redscore-up">+</button>
-			<button id="redscore-down">-</button>
+			<div class="scoreboard-subsection">
+				<label for="period">Period</label>
+				<span class="currentvalue" id="period-value">0</span>
+				<input type="text" class="shortinput" class="shortinput" id="period">
+				<button id="period-set">Set</button>
+				<button id="period-up">+</button>
+				<button id="period-down">-</button>
+			</div>
 		</div>
 
 		<div class="scoreboard-section">
 			<div class="scoreboard-subsection">
 				<label for="redname">Red Team Name</label>
+				<span class="currentvalue currentvalue-red" id="redname-value">Butts</span>
 				<input type="text" id="redname">
+				<button id="redname-set">Set</button>
 			</div>
 			<div class="scoreboard-subsection">
 				<label for="redscore">Red Score</label>
-				<input type="text" id="redscore">
+				<span class="currentvalue currentvalue-red" id="redscore-value">0</span>
+				<input type="text" class="shortinput" id="redscore">
+				<button id="redscore-set">Set</button>
 				<button id="redscore-up">+</button>
 				<button id="redscore-down">-</button>
 			</div>
@@ -51,24 +175,29 @@
 		<div class="scoreboard-section">
 			<div class="scoreboard-subsection">
 				<label for="bluename">Blue Team Name</label>
+				<span class="currentvalue currentvalue-blue" id="bluename-value">Nuts</span>
 				<input type="text" id="bluename">
+				<button id="bluename-set">Set</button>
 			</div>
 			<div class="scoreboard-subsection">
 				<label for="bluescore">Blue Score</label>
-				<input type="text" id="bluescore">
-				<button id="redscore-up">+</button>
-				<button id="redscore-down">-</button>
+				<span class="currentvalue currentvalue-blue" id="bluescore-value">0</span>
+				<input type="text" class="shortinput" id="bluescore">
+				<button id="bluescore-set">Set</button>
+				<button id="bluescore-up">+</button>
+				<button id="bluescore-down">-</button>
 			</div>
 		</div>
 
 		<div class="scoreboard-section">
 			<div class="scoreboard-subsection">
 				<label for="timerentry-minutes">Timer Entry (Minutes)</label>
-				<input type="text" id="timerentry-minutes">
-			</div>
-			<div class="scoreboard-subsection">
+				<span class="currentvalue currentvalue-yellow" id="minutes-value">0</span>
+				<input type="text" class="shortinput" id="timerentry-minutes">
 				<label for="timerentry-seconds">Timer Entry (Seconds)</label>
-				<input type="text" id="timerentry-seconds">
+				<span class="currentvalue currentvalue-yellow" id="seconds-value">0</span>
+				<input type="text" class="shortinput" id="timerentry-seconds">
+				<button id="timerentry-set">Set</button>
 			</div>
 			<div class="scoreboard-subsection">
 				<button id="timerstart">Start</button>
