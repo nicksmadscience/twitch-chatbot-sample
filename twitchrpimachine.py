@@ -860,7 +860,7 @@ def on_message(ws, message_json):
             traceback.print_exc()
             subscriberMessage = "Thanks for the bits!"
 
-        print ("test 1")
+        print ("test 5")
         try:
             messageInMessage = json.loads(message["data"]["message"].replace("\\", ""))
         except:
