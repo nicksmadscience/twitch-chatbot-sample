@@ -33,6 +33,12 @@ body
 }
 
 
+.mediuminput
+{
+	width: 6em;
+}
+
+
 .currentvalue
 {
 	font-size: 2em;
@@ -115,28 +121,51 @@ function newWebsocket()
 	    {
 	    	console.log(websocketMessage_array["timeLeft"]);
 
-	    	var countdownSplit = websocketMessage_array["timeLeft"].split(":");
-	    	document.getElementById("minutes-value").innerHTML = countdownSplit[0];
-	    	document.getElementById("seconds-value").innerHTML = countdownSplit[1];
+	    	document.getElementById("timer-value").innerHTML = websocketMessage_array["timeLeft"];
 	    }
-
     }
 }
 
 // Looks for the element named *id*, grabs its value, and sends said value
 // to twitchrpimachine etc. via websocket with the *key* string as the... thing to change.
-function sendWebsocketSetting(key, id)
+function sendWebsocketSettingFromValueOf(key_, id)
 {
+	console.log("key: " + key_.toString());
+	console.log("id: " + id.toString());
 	var element = document.getElementById(id);
 
-	s.send('forward5')
+	// thanks, stasmo!
+	let i = {}
+	i[key_] = value
+	JSON.stringify(i)
+
+	var toSend = JSON.stringify({[key_]: element.value});
+	console.log(toSend);
+	s.send(toSend);
 }
+
+function sendWebsocketSetting(tosend_object)
+{
+	var toSend = JSON.stringify(tosend_object);
+	console.log(toSend);
+	s.send(toSend);
+}
+
+
+function valueOf(id_string)
+{
+	var value = document.getElementById("id_string").value;
+	console.log("value: " + str(value));
+	return value;
+}
+
 
 
 
 window.onload = function()
 {
     newWebsocket();
+    // console.log(valueOf('bluescore'));
 }
 
 
@@ -183,7 +212,7 @@ window.onload = function()
 				<label for="bluescore">Blue Score</label>
 				<span class="currentvalue currentvalue-blue" id="bluescore-value">0</span>
 				<input type="text" class="shortinput" id="bluescore">
-				<button id="bluescore-set">Set</button>
+				<button id="bluescore-set" onclick="sendWebsocketSetting({'message': 'scoreboard', 'bluescore': valueOf('bluescore')})">Set</button>
 				<button id="bluescore-up">+</button>
 				<button id="bluescore-down">-</button>
 			</div>
@@ -191,19 +220,34 @@ window.onload = function()
 
 		<div class="scoreboard-section">
 			<div class="scoreboard-subsection">
-				<label for="timerentry-minutes">Timer Entry (Minutes)</label>
-				<span class="currentvalue currentvalue-yellow" id="minutes-value">0</span>
-				<input type="text" class="shortinput" id="timerentry-minutes">
-				<label for="timerentry-seconds">Timer Entry (Seconds)</label>
-				<span class="currentvalue currentvalue-yellow" id="seconds-value">0</span>
-				<input type="text" class="shortinput" id="timerentry-seconds">
+				<label for="timer-entry">Timer</label>
+				<span class="currentvalue currentvalue-yellow" id="timer-value">0</span>
+				<input type="text" class="mediuminput" id="timer-entry">
+
 				<button id="timerentry-set">Set</button>
 			</div>
 			<div class="scoreboard-subsection">
-				<button id="timerstart">Start</button>
-				<button id="timerstop">Stop</button>
+				<button id="timerstart" onclick="sendWebsocketSetting({'message': 'countdown', 'timer': 'start'})">Start</button>
+				<button id="timerstart" onclick="sendWebsocketSetting({'message': 'countdown', 'timer': 'stop'})">Stop</button>
 			</div>
 		</div>
+
+		<div class="scoreboard-section">
+			<div class="scoreboard-subsection">
+				<label for="competition-entry">Competition</label>
+				<span class="currentvalue currentvalue-yellow" id="competition-value">0</span>
+				<input type="text" class="input" id="competition-entry">
+
+				<button id="competitionentry-set">Set</button>
+			</div>
+
+			<div class="scoreboard-subsection">
+				<label for="contributor-entry">Contributor</label>
+				<span class="currentvalue currentvalue-yellow" id="contributor-value">0</span>
+				<input type="text" class="input" id="contributor-entry">
+
+				<button id="contributorentry-set">Set</button>
+			</div>
 	</body>
 </html>
 
