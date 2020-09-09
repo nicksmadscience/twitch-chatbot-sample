@@ -103,10 +103,10 @@ body
 {
 	background: linear-gradient(20deg, #008800 0%, #005500 100%);
 	position: absolute;
-	bottom: 30px;
+	bottom: 15px;
 	left: 700px;
 	width: 620px;
-	height: 350px;
+	height: 420px;
 	border-radius: 20px;
 	border: 2px solid #003300;
 	box-shadow: 0 5px 0 #001800, 2px 2px 20px rgba(0, 0, 0, 0.8);
@@ -143,10 +143,10 @@ body
 
 .scoreboard-score
 {
-	width: 150px;
+	width: 180px;
 	height: 150px;
 	position: absolute;
-	top: 35px;
+	top: 55px;
 	text-align: center;
 }
 
@@ -165,7 +165,7 @@ body
 .scoreboard-7seg
 {
 	font-family: "Segment7Standard";
-	font-size: 70px;
+	font-size: 75px;
 	margin-top: 12px;
 }
 
@@ -185,15 +185,16 @@ body
 	height: 100px;
 	background-color: #111;
 	position: absolute;
-	bottom: 20px;
-	left: 90px;
+	bottom: 55px;
+	left: 130px;
 	color: #ff8;
-	font-size: 70px;
+	font-size: 80px;
 	text-align: center;
 }
+
 .scoreboard-countdown-text
 {
-	margin-top: 14px;
+	margin-top: 6px;
 }
 
 .scoreboard-countdown-text-7seg
@@ -212,7 +213,7 @@ body
 	width: 70px;
 	height: 60px;
 	top: 50px;
-	left: 225px;
+	left: 260px;
 	text-align: center;
 }
 
@@ -231,6 +232,27 @@ body
 	font-family: "Segment7Standard";
 }
 
+.scoreboard-bigmarquee
+{
+	background-color: #121;
+	color: #1f1;
+	font-family: "VT323";
+	font-size: 40px;
+	text-align: center;
+	width: 100%;
+	position: absolute;
+	padding: 3px;
+}
+
+.scoreboard-bigmarquee-top
+{
+	top: 0;
+}
+
+.scoreboard-bigmarquee-bottom
+{
+	bottom: 0;
+}
 
 		</style>
 	</head>
@@ -239,6 +261,7 @@ body
 
 		<div class="scoreboard">
 			<div class="scoreboard-borderinset">
+				<div class="scoreboard-bigmarquee scoreboard-bigmarquee-top">Let's compare...</div>
  				<div class="scoreboard-score scoreboard-score-red">
 					<div class="scoreboard-teamname scoreboard-teamname-red" id="teamname-red">SPACES</div>
 					<div class="scoreboard-7seg scoreboard-7seg-red" id="score-red">0</div>
@@ -258,6 +281,7 @@ body
 					<div class="scoreboard-period-label">PERIOD</div>
 					<div class="scoreboard-period-number" id="period">0</div>
 				</div>
+				<div class="scoreboard-bigmarquee scoreboard-bigmarquee-bottom">Suggested by me</div>
 			</div>
 		</div>
 	</body>
