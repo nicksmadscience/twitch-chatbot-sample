@@ -117,7 +117,7 @@ led_onair    = 14
 # TODO: eventually what I wanna do is keep a record of everyone who triggered each event
 # (at least with the competing dog buttons) and how many times they did each thing
 
-count = {"red": 0, "blue": 0, "redteam": "ANGULAR", "blueteam": "REACT", "period": "1"}
+count = {"red": 0, "blue": 0, "redteam": "RED", "blueteam": "BLUE", "period": "1", "competition": "Favorite color?", "contributor": "Suggested by me"}
 # countdown = {"active": False, "startTime": 0, "endTime": 0}
 
 countdown = countdownClass("none", 0, 0) # set initial timer to one that immediately expires
@@ -395,9 +395,9 @@ def requestHandler_spookymode(get):
 
     try:
         xr18.send_message("/fx/1/insert", [1.0])
-        xr18.send_message("/rtn/2/mix/fader", [0.4])
-        xr18.send_message("/rtn/3/mix/fader", [0.7])
-        xr18.send_message("/rtn/4/mix/fader", [0.6])
+        xr18.send_message("/rtn/2/mix/fader", [0.7])
+        xr18.send_message("/rtn/3/mix/fader", [0.5])
+        xr18.send_message("/rtn/4/mix/fader", [0.4])
 
         # requests.get("http://10.0.0.44:8081/preset/totd")
 
@@ -512,6 +512,27 @@ def requestHandler_all_strobes_off(get):
         return "text/plain", "ok"
 
 
+def requestHandler_dog_button_blue(get):
+    try:
+        requests.get("http://10.0.0.4/attention")
+    except Exception as e:
+        return "text/plain", traceback.print_exc(e)
+    else:
+        return "text/plain", OK
+
+
+def requestHandler_dog_button_red(get):
+    try:
+        requests.get("http://10.0.0.5/attention")
+    except Exception as e:
+        return "text/plain", traceback.print_exc(e)
+    else:
+        return "text/plain", OK
+
+
+
+
+
 
 # def requestHandler_showtime(get):
 #     try:
@@ -543,7 +564,10 @@ httpRequests = {'': requestHandler_index,
                 'all_strobes_on': requestHandler_all_strobes_on,
                 'all_strobes_off': requestHandler_all_strobes_off,
                 'RaidSimulator': requestHandler_RaidSimulator,
-                'dogtrick': requestHandler_dogtrick}
+                'dogtrick': requestHandler_dogtrick,
+                'dog_button_blue': requestHandler_dog_button_blue,
+                'dog_button_red': requestHandler_dog_button_red,
+                }
 
 
 
@@ -817,6 +841,28 @@ def turnOffLED(_relay):
     serPort.write("gpio clear " + str(_relay) + "\r")
 
 
+def buttonRequestHandler(team, points):
+    print ("OH HECK IT'S BLUE BUTTON A O'CLOCK")
+    count["blue"] += 1
+    print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
+
+    try:
+        requests.get("http://10.0.0.4/attention")
+    except Exception as e:
+        traceback.print_exc(e)
+
+    for client in clients:
+        client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+
+    with open("count.json", "wb") as count_file:
+        count_file.write(json.dumps(count))
+
+    teamName = count["blueteam"]
+    score = count["blue"]
+
+    requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
+    requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
+
 
 
 
@@ -903,10 +949,37 @@ def on_message(ws, message_json):
         turnOffRelay(relay_fogmachine)
 
     elif message_json.find("723006a2-3caf-4a6a-9aff-3dbe94231d41") != -1:
-        print ("OH HECK IT'S RED LIGHT TEST O'CLOCK")
+        print ("OH HECK IT'S RED ROTATING LIGHT O'CLOCK")
         turnOnRelay(relay_redlight)
         time.sleep(5)
         turnOffRelay(relay_redlight)
+
+    elif message_json.find("09f2fb67-e75c-4230-b131-3d87624f91ef") != -1:
+        print ("OH HECK IT'S GREEN LIGHTING O'CLOCK")
+        requests.get("http://10.0.0.44:8081/preset/nms")
+
+    elif message_json.find("5c0415aa-c34b-4406-9bbd-716d2234c8df") != -1:
+        print ("OH HECK IT'S RED LIGHTING O'CLOCK")
+        requests.get("http://10.0.0.44:8081/preset/red")
+
+    elif message_json.find("fc223bd0-bf21-4282-9f8e-c48f129de97f") != -1:
+        print ("OH HECK IT'S BLUE LIGHTING O'CLOCK")
+        requests.get("http://10.0.0.44:8081/preset/fyv")
+
+    elif message_json.find("3b3a4e59-f111-4ff7-8dfc-494a95b0c883") != -1:
+        print ("OH HECK IT'S TOTD LIGHTING O'CLOCK")
+        requests.get("http://10.0.0.44:8081/preset/totd")
+
+
+# 3b3a4e59-f111-4ff7-8dfc-494a95b0c883
+
+# fc223bd0-bf21-4282-9f8e-c48f129de97f
+# 5c0415aa-c34b-4406-9bbd-716d2234c8df
+        # 7686f836-550f-41b6-b9a9-a3b25b678fcd
+
+    # http://10.0.0.44:8081/preset/red
+
+    # ESSAGE","data":{"topic":"channel-points-channel-v1.105293178","message":"{\"type\":\"reward-redeemed\",\"data\":{\"timestamp\":\"2020-09-11T19:25:39.849111457Z\",\"redemption\":{\"id\":\"7686f836-550f-41b6-b9a9-a3b25b678fcd\",\"user\":{\"id\":\"105293178\",\"login\":\"nicksmadscience\",\"display_name\":\"nicksmadscience\"},\"channel_id\":\"105293178\",\"redeemed_at\":\"2020-09-11T19:25:39.849111457Z\",\"reward\":{\"id\":\"09f2fb67-e75c-4230-b131-3d87624f91ef\",\"channel_id\":\"105293178\",\"title\":\"Lighting: Green\",\"prompt\":\"\",\"cost\":25,\"is_user_input_required\":false,\"is_sub_only\":false,\"image\":null,\"default_image\":{\"url_1x\":\"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\",\"url_2x\":\"https://static-cdn.jtvnw.net/custom-
 
 # {"type":"MESSAGE","data":{"topic":"channel-subscribe-events-v1.105293178","message":"{\"benefit_end_month\":10,\"user_name\":\"misscocoderp\",\"display_name\":\"MissCocoDerp\",\"channel_name\":\"nicksmadscience\",\"user_id\":\"91256946\",\"channel_id\":\"105293178\",\"time\":\"2020-09-01T18:35:37.040205227Z\",\"sub_message\":{\"message\":\"\",\"emotes\":null},\"sub_plan\":\"1000\",\"sub_plan_name\":\"Channel Subscription (nicksmadscience)\",\"months\":0,\"cumulative_months\":1,\"context\":\"sub\",\"is_gift\":false,\"multi_month_duration\":0}"}}
 
@@ -944,7 +1017,7 @@ def on_message(ws, message_json):
             traceback.print_exc(e)
 
         for client in clients:
-            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count, "animation": "blue-up-1"}))
 
         with open("count.json", "wb") as count_file:
             count_file.write(json.dumps(count))
@@ -952,7 +1025,7 @@ def on_message(ws, message_json):
         teamName = count["blueteam"]
         score = count["blue"]
 
-        requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
+        # requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
         requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
 
 
@@ -966,7 +1039,7 @@ def on_message(ws, message_json):
             traceback.print_exc(e)
 
         for client in clients:
-            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count, "animation": "red-up-1"}))
 
         with open("count.json", "wb") as count_file:
             count_file.write(json.dumps(count))
@@ -975,18 +1048,18 @@ def on_message(ws, message_json):
         score = count["red"]
 
         # TODO: could there be a more direct way than the script calling its own webserver?
-        requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
+        # requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
         requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
 
-    elif message_json.find("a95fcc52-8ed9-4f47-93ff-07749826da39") != -1:
-        print ("OH HECK IT'S YELLOW BUTTON B O'CLOCK")
+    elif message_json.find("fe92a417-adf0-4137-980d-22245819c6f5") != -1:
+        print ("OH HECK IT'S FEED THAT PUP O'CLOCK")
 
         requests.get("http://10.0.0.220:8081/titleplay/nms-feedthatpup.html/{}/theripper")
 
-        try:
-            requests.get("http://10.0.0.3/attention")
-        except Exception as e:
-            traceback.print_exc(e)
+        # try:
+        #     requests.get("http://10.0.0.3/attention")
+        # except Exception as e:
+        #     traceback.print_exc(e)
      
 
 
@@ -1125,7 +1198,7 @@ while go:
                 # TODO: obviously, screen to make sure this is coming from an authorized account
 
                 # TODO: there appears to be a "real" way to do this in IRC if enabled
-                elif message.find("is raiding the channel") != -1:
+                elif message.find("is raiding") != -1:
                     if username == "nicksmadscience" or username == "streamelements":
                         try:
                             print("******* OKAY this is the part where I'm calling isRaiding because I saw \"is raiding\" in chat!")

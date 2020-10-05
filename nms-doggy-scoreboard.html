@@ -8,6 +8,18 @@
 		<script type="text/javascript">
 
 
+function oneShotPlayAnimation(_elementName, _className, _expiration)
+{
+	var element = document.getElementById(_elementName)
+	element.classList.add(_className);
+
+	setTimeout(function() {
+		element.classList.remove(_className);
+	}, _expiration);
+}
+
+
+
 
 function newWebsocket()
 {
@@ -51,7 +63,19 @@ function newWebsocket()
 	    	document.getElementById("score-blue").innerHTML = websocketMessage_array["count"]["blue"];
 	    	document.getElementById("period").innerHTML = websocketMessage_array["count"]["period"];
 	    	document.getElementById("teamname-red").innerHTML = websocketMessage_array["count"]["redteam"];
-	    	document.getElementById("teamname-blue").innerHTML = websocketMessage_array["count"]["blueteam"];
+			document.getElementById("teamname-blue").innerHTML = websocketMessage_array["count"]["blueteam"];
+			
+
+			switch(websocketMessage_array["animation"])
+			{
+				case "red-up-1":  oneShotPlayAnimation("scoreboard-red",  "scoreboard-score-red-up-1",  4000);
+								  oneShotPlayAnimation("floatypoints-red", "scoreboard-floatypoints-animation", 3000);
+								  break;
+				case "blue-up-1": oneShotPlayAnimation("scoreboard-blue", "scoreboard-score-blue-up-1", 4000);
+							      oneShotPlayAnimation("floatypoints-blue", "scoreboard-floatypoints-animation", 3000);
+								  break;
+				default: break;
+			}
 	    }
 	    else if (messageType == "countdown")
 	    {
@@ -148,18 +172,119 @@ body
 	position: absolute;
 	top: 55px;
 	text-align: center;
+	box-sizing: border-box;
 }
 
 .scoreboard-score-red
 {
 	left: 30px;
 	background-color: #111;
+
+	
+}
+
+.scoreboard-score-red-up-1
+{
+	border: 0px solid red;
+	box-shadow: 0 0 0 red;
+	animation-name: score-red-single;
+	/* animation-delay: 1s; */
+
+	animation-duration: 3s;
+	animation-iteration-count: 1;
+	animation-fill-mode: forwards;
+}
+
+
+@keyframes score-red-single
+{
+	0%
+	{
+		border: 0px solid red;
+		box-shadow: 0 0 0 0 red;
+		filter: contrast(100%) brightness(100%);
+	}
+	7%
+	{
+		border: 4px solid red;
+		box-shadow: 0 0 4px 0 red;
+		filter: contrast(100%) brightness(100%);
+	}
+	18%
+	{
+		border: 1px solid red;
+		box-shadow: 0 0 12px 4px red;
+		filter: contrast(100%) brightness(100%);
+	}
+	28%
+	{
+		border: 1px solid red;
+		box-shadow: 0 0 20px 20px red;
+		filter: contrast(50%) brightness(150%);
+	}
+	100%
+	{
+		border: 0px solid red;
+		box-shadow: 0 0 0 0 red;
+		filter: contrast(100%) brightness(100%);
+	}
+
+	
 }
 
 .scoreboard-score-blue
 {
 	right: 30px;
 	background-color: #111;
+}
+
+
+.scoreboard-score-blue-up-1
+{
+	border: 0px solid blue;
+	box-shadow: 0 0 0 blue;
+	animation-name: score-blue-single;
+	animation-duration: 3s;
+	animation-iteration-count: 1;
+	animation-fill-mode: forwards;
+}
+
+
+
+@keyframes score-blue-single
+{
+	0%
+	{
+		border: 0px solid blue;
+		box-shadow: 0 0 0 0 blue;
+		filter: contrast(100%) brightness(100%);
+	}
+	7%
+	{
+		border: 4px solid blue;
+		box-shadow: 0 0 4px 0 blue;
+		filter: contrast(100%) brightness(100%);
+	}
+	18%
+	{
+		border: 1px solid blue;
+		box-shadow: 0 0 12px 4px blue;
+		filter: contrast(100%) brightness(100%);
+	}
+	28%
+	{
+		border: 1px solid blue;
+		box-shadow: 0 0 20px 20px blue;
+		filter: contrast(50%) brightness(150%);
+	}
+	100%
+	{
+		border: 0px solid blue;
+		box-shadow: 0 0 0 0 blue;
+		filter: contrast(100%) brightness(100%);
+	}
+
+	
 }
 
 .scoreboard-7seg
@@ -254,6 +379,59 @@ body
 	bottom: 0;
 }
 
+.scoreboard-floatypoints
+{
+	color: white;
+	z-index: 2000;
+	font-size: 50px;
+	position: absolute;
+	top: -10px;
+	left: -10px;
+	text-shadow: 2px 2px 4px black;
+	/* background-color: rgba(0, 0, 0, 0.4); */
+	/* border-radius: 4px; */
+	/* padding: 3px; */
+	font-family: "Raleway", sans-serif;
+
+	opacity: 0.0;
+	text-shadow: 0 0 0 black;
+	transform: translateY(0);
+	
+}
+
+.scoreboard-floatypoints-animation
+{
+	animation-name: floatypoints;
+	animation-duration: 2s;
+	animation-iteration-count: 1;
+}
+
+@keyframes floatypoints
+{
+	0%
+	{
+		opacity: 0.0;
+		text-shadow: 0 0 0 black;
+		transform: translateY(0);
+	}
+	10%
+	{
+		opacity: 1.0;
+		text-shadow: 2px 2px 6px rgba(255, 255, 128, 0.7);
+	}
+	30%
+	{
+		text-shadow: 2px 2px 4px black;
+	}
+	100%
+	{
+		opacity: 0.0;
+		transform: translateY(-30px);
+	}
+}
+
+
+
 		</style>
 	</head>
 	<body>
@@ -262,11 +440,13 @@ body
 		<div class="scoreboard">
 			<div class="scoreboard-borderinset">
 				<div class="scoreboard-bigmarquee scoreboard-bigmarquee-top">Let's compare...</div>
- 				<div class="scoreboard-score scoreboard-score-red">
+ 				<div class="scoreboard-score scoreboard-score-red" id="scoreboard-red">
+					<div class="scoreboard-floatypoints" id="floatypoints-red">+1</div>
 					<div class="scoreboard-teamname scoreboard-teamname-red" id="teamname-red">SPACES</div>
 					<div class="scoreboard-7seg scoreboard-7seg-red" id="score-red">0</div>
 				</div>
-				<div class="scoreboard-score scoreboard-score-blue">
+				<div class="scoreboard-score scoreboard-score-blue" id="scoreboard-blue">
+					<div class="scoreboard-floatypoints" id="floatypoints-blue">+1</div>
 					<div class="scoreboard-teamname scoreboard-teamname-blue" id="teamname-blue">TABS</div>
 					<div class="scoreboard-7seg scoreboard-7seg-blue" id="score-blue">0</div>
 				</div>
