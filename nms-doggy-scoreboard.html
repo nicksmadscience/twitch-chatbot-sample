@@ -20,6 +20,18 @@ function oneShotPlayAnimation(_elementName, _className, _expiration)
 
 
 
+function stupidJavaScriptAnimationFiver(_elementName)
+{
+	var element = document.getElementById(_elementName);
+
+	setTimeout(function() { element.innerHTML = "+1"; }, 500);
+	setTimeout(function() { element.innerHTML = "+2"; }, 1020);
+	setTimeout(function() { element.innerHTML = "+3"; }, 1340);
+	setTimeout(function() { element.innerHTML = "+4"; }, 1660);
+	setTimeout(function() { element.innerHTML = "+5"; }, 2260);
+}
+
+
 
 function newWebsocket()
 {
@@ -64,15 +76,27 @@ function newWebsocket()
 	    	document.getElementById("period").innerHTML = websocketMessage_array["count"]["period"];
 	    	document.getElementById("teamname-red").innerHTML = websocketMessage_array["count"]["redteam"];
 			document.getElementById("teamname-blue").innerHTML = websocketMessage_array["count"]["blueteam"];
+			document.getElementById("competition").innerHTML = websocketMessage_array["count"]["competition"];
+			document.getElementById("contributor").innerHTML = websocketMessage_array["count"]["contributor"];
 			
 
 			switch(websocketMessage_array["animation"])
 			{
 				case "red-up-1":  oneShotPlayAnimation("scoreboard-red",  "scoreboard-score-red-up-1",  4000);
-								  oneShotPlayAnimation("floatypoints-red", "scoreboard-floatypoints-animation", 3000);
+								  oneShotPlayAnimation("floatypoints-red", "scoreboard-floatypoints-animation", 6000);
+								  document.getElementById("floatypoints-red").innerHTML = "+1";
 								  break;
 				case "blue-up-1": oneShotPlayAnimation("scoreboard-blue", "scoreboard-score-blue-up-1", 4000);
-							      oneShotPlayAnimation("floatypoints-blue", "scoreboard-floatypoints-animation", 3000);
+								  oneShotPlayAnimation("floatypoints-blue", "scoreboard-floatypoints-animation", 6000);
+								  document.getElementById("floatypoints-blue").innerHTML = "+1";
+								  break;
+				case "red-up-5":  oneShotPlayAnimation("scoreboard-red",  "scoreboard-score-red-up-5",  4000);
+								  oneShotPlayAnimation("floatypoints-red", "scoreboard-floatypoints-five-animation", 6000);
+								  stupidJavaScriptAnimationFiver("floatypoints-red");
+								  break;
+				case "blue-up-5": oneShotPlayAnimation("scoreboard-blue", "scoreboard-score-blue-up-5", 4000);
+								  oneShotPlayAnimation("floatypoints-blue", "scoreboard-floatypoints-five-animation", 6000);
+								  stupidJavaScriptAnimationFiver("floatypoints-blue");
 								  break;
 				default: break;
 			}
@@ -404,6 +428,7 @@ body
 	animation-name: floatypoints;
 	animation-duration: 2s;
 	animation-iteration-count: 1;
+	animation-delay: 0.5s;
 }
 
 @keyframes floatypoints
@@ -430,6 +455,101 @@ body
 	}
 }
 
+.scoreboard-floatypoints-five-animation
+{
+	animation-name: floatypointsfive;
+	animation-duration: 4s;
+	animation-iteration-count: 1;
+	animation-delay: 0.5s;
+}
+
+@keyframes floatypointsfive
+{
+	0%
+	{
+		opacity: 0.0;
+		text-shadow: 0 0 0 black;
+		transform: rotateZ(0deg);
+	}
+	5%
+	{ /* BAM 1 */
+		opacity: 1.0;
+		text-shadow: 2px 2px 6px rgba(255, 255, 128, 0.7);
+		transform: rotateZ(2deg) scale(1.0);
+	}
+	12%
+	{/* fallback 1 */
+		text-shadow: 2px 2px 4px black;
+		transform: rotateZ(0deg) scale(0.9);
+	}
+	13%
+	{/* BAM 2 */
+		content: "+2";
+		text-shadow: 2px 2px 6px rgba(255, 255, 128, 0.7);
+		transform: rotateZ(-5deg) scale(1.35);
+	}
+	20%
+	{/* fallback 2 */
+		text-shadow: 2px 2px 4px black;
+		transform: rotateZ(-1deg) scale(1.0);
+	}
+	21%
+	{/* BAM 3 */
+		content: "+3";
+		text-shadow: 2px 2px 6px rgba(255, 255, 128, 0.7);
+		transform: rotateZ(15deg) scale(1.7);
+	}
+	28%
+	{/* fallback 3 */
+		text-shadow: 2px 2px 4px black;
+		transform: rotateZ(6deg) scale(1.1);
+	}
+	29%
+	{/* BAM 4 */
+		content: "+4";
+		text-shadow: 2px 2px 6px rgba(255, 255, 128, 0.7);
+		transform: rotateZ(-7deg) scale(2.2);
+	}
+	36%
+	{/* fallback 4 */
+		text-shadow: 2px 2px 4px black;
+		transform: rotateZ(1deg) scale(1.5);
+	}
+	40%
+	{ /* puuuuullll back */
+		text-shadow: 2px 2px 6px rgba(255, 255, 128, 0.7);
+		transform: rotateZ(-13deg) scale(0.4);
+	}
+	42%
+	{ /* hold */
+		text-shadow: 2px 2px 4px black;
+		transform: rotateZ(-13deg) scale(0.3);
+	}
+	44%
+	{/* BAAAAAAAM 5 */
+		content: "+5";
+		text-shadow: 2px 2px 6px rgba(0, 255, 0, 1.0);
+		transform: rotateZ(0) scale(4.0);
+	}
+	54%
+	{
+		text-shadow: 2px 2px 6px rgba(0, 255, 0, 0.7);
+		transform: rotateZ(0) scale(3.0);
+	}
+	80%
+	{
+		text-shadow: 2px 2px 4px black;
+		transform: rotateZ(0) scale(0.9);
+		opacity: 1.0;
+	}
+	100%
+	{
+		text-shadow: 2px 2px 4px black;
+		transform: rotateZ(0) scale(0.2);
+		opacity: 0.0;
+	}
+}
+
 
 
 		</style>
@@ -439,7 +559,7 @@ body
 
 		<div class="scoreboard">
 			<div class="scoreboard-borderinset">
-				<div class="scoreboard-bigmarquee scoreboard-bigmarquee-top">Let's compare...</div>
+				<div class="scoreboard-bigmarquee scoreboard-bigmarquee-top" id="competition">Let's compare...</div>
  				<div class="scoreboard-score scoreboard-score-red" id="scoreboard-red">
 					<div class="scoreboard-floatypoints" id="floatypoints-red">+1</div>
 					<div class="scoreboard-teamname scoreboard-teamname-red" id="teamname-red">SPACES</div>
@@ -461,7 +581,7 @@ body
 					<div class="scoreboard-period-label">PERIOD</div>
 					<div class="scoreboard-period-number" id="period">0</div>
 				</div>
-				<div class="scoreboard-bigmarquee scoreboard-bigmarquee-bottom">Suggested by me</div>
+				<div class="scoreboard-bigmarquee scoreboard-bigmarquee-bottom" id="contributor">Suggested by me</div>
 			</div>
 		</div>
 	</body>

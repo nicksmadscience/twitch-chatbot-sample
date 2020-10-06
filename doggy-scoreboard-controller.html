@@ -154,10 +154,14 @@ function sendWebsocketSetting(tosend_object)
 
 function valueOf(id_string)
 {
-	var value = document.getElementById("id_string").value;
-	console.log("value: " + str(value));
+	var value = document.getElementById(id_string).value;
+	console.log("value: ", value);
 	return value;
 }
+
+
+
+
 
 
 
@@ -165,7 +169,111 @@ function valueOf(id_string)
 window.onload = function()
 {
     newWebsocket();
-    // console.log(valueOf('bluescore'));
+	
+// onclick="sendWebsocketSetting({'message': 'countdown', 'timer': 'start'})"
+// sendWebsocketSetting({'message': 'scoreboard', 'bluescore': valueOf('bluescore')})"
+
+
+
+	// period
+
+	document.getElementById("period-set").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "period-set", "value": valueOf("period")});
+	});
+
+	document.getElementById("period-up").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "period-up"})
+	});
+
+	document.getElementById("period-down").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "period-down"})
+	});
+
+
+
+	// red name
+
+	document.getElementById("redname-set").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "redname-set", "value": valueOf("redname")});
+	});
+
+
+
+	// red score
+
+	document.getElementById("redscore-set").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "redscore-set", "value": valueOf("redscore")});
+	});
+
+	document.getElementById("redscore-up").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "redscore-up"})
+	});
+
+	document.getElementById("redscore-down").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "redscore-down"})
+	});
+
+
+
+	// blue name
+
+	document.getElementById("bluename-set").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "bluename-set", "value": valueOf("bluename")});
+	});
+
+
+
+
+	// blue score
+
+	document.getElementById("bluescore-set").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "bluescore-set", "value": valueOf("bluescore")});
+	});
+
+	document.getElementById("bluescore-up").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "bluescore-up"})
+	});
+
+	document.getElementById("bluescore-down").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "bluescore-down"})
+	});
+
+
+
+
+	// timer
+
+	document.getElementById("timer-set").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "countdown", "command": "timer-set", "minutes": valueOf("timer-minutes"), "seconds": valueOf("timer-seconds")});
+	});
+
+	/*
+	document.getElementById("timer-start").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "countdown", "command": "timer-start"})
+	});
+
+	document.getElementById("timer-stop").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "countdown", "command": "timer-stop"})
+	});
+	*/
+
+
+
+	// competition
+
+	document.getElementById("competition-set").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "competition-set", "value": valueOf("competition")});
+	});
+
+
+
+	// contributor
+
+	document.getElementById("contributor-set").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "scoreboard", "command": "contributor-set", "value": valueOf("contributor")});
+	});
+
+
 }
 
 
@@ -212,7 +320,7 @@ window.onload = function()
 				<label for="bluescore">Blue Score</label>
 				<span class="currentvalue currentvalue-blue" id="bluescore-value">0</span>
 				<input type="text" class="shortinput" id="bluescore">
-				<button id="bluescore-set" onclick="sendWebsocketSetting({'message': 'scoreboard', 'bluescore': valueOf('bluescore')})">Set</button>
+				<button id="bluescore-set">Set</button>
 				<button id="bluescore-up">+</button>
 				<button id="bluescore-down">-</button>
 			</div>
@@ -220,33 +328,36 @@ window.onload = function()
 
 		<div class="scoreboard-section">
 			<div class="scoreboard-subsection">
-				<label for="timer-entry">Timer</label>
+				<label for="timer-minutes">Timer</label>
 				<span class="currentvalue currentvalue-yellow" id="timer-value">0</span>
-				<input type="text" class="mediuminput" id="timer-entry">
+				<input type="text" class="mediuminput" id="timer-minutes">
+				<input type="text" class="mediuminput" id="timer-seconds">
 
-				<button id="timerentry-set">Set</button>
+				<button id="timer-set">Set</button>
 			</div>
+			<!--  Countdowns are tied to a specific time of day so starting and stopping is tricky
 			<div class="scoreboard-subsection">
-				<button id="timerstart" onclick="sendWebsocketSetting({'message': 'countdown', 'timer': 'start'})">Start</button>
-				<button id="timerstart" onclick="sendWebsocketSetting({'message': 'countdown', 'timer': 'stop'})">Stop</button>
+				<button id="timer-start">Start</button>
+				<button id="timer-stop">Stop</button>
 			</div>
+			-->
 		</div>
 
 		<div class="scoreboard-section">
 			<div class="scoreboard-subsection">
-				<label for="competition-entry">Competition</label>
+				<label for="competition">Competition</label>
 				<span class="currentvalue currentvalue-yellow" id="competition-value">0</span>
-				<input type="text" class="input" id="competition-entry">
+				<input type="text" class="input" id="competition">
 
-				<button id="competitionentry-set">Set</button>
+				<button id="competition-set">Set</button>
 			</div>
 
 			<div class="scoreboard-subsection">
-				<label for="contributor-entry">Contributor</label>
+				<label for="contributor">Contributor</label>
 				<span class="currentvalue currentvalue-yellow" id="contributor-value">0</span>
-				<input type="text" class="input" id="contributor-entry">
+				<input type="text" class="input" id="contributor">
 
-				<button id="contributorentry-set">Set</button>
+				<button id="contributor-set">Set</button>
 			</div>
 	</body>
 </html>

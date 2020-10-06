@@ -648,19 +648,74 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
       
     def on_message(self, message):  # when the script receives a message from the web browser
+        global countdown
         print ('message received:  %s' % message)
 
-        if message == "sample message":
-            # do sample thing
-            pass
-
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "sample response", "animation": "explode"}))
+        incoming = json.loads(message)
 
 
-        elif message[0:7] == "generic":
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "generic", "message": message[8:]}))
+        if incoming["message"] == "scoreboard":
+            try:
+
+                # period
+                if incoming["command"] == "period-set":
+                    count["period"] = incoming["value"]
+                elif incoming["command"] == "period-up":
+                    count["period"] = str(int(count["period"]) + 1)
+                elif incoming["command"] == "period-down":
+                    count["period"] = str(int(count["period"]) - 1)
+
+                # red name
+                elif incoming["command"] == "redname-set":
+                    count["redteam"] = incoming["value"]
+
+                # red score
+                elif incoming["command"] == "redscore-set":
+                    count["red"] = incoming["value"]
+                elif incoming["command"] == "redscore-up":
+                    count["red"] = str(int(count["red"]) + 1)
+                elif incoming["command"] == "redscore-down":
+                    count["red"] = str(int(count["red"]) - 1)
+
+
+                # blue name
+                elif incoming["command"] == "bluename-set":
+                    count["blueteam"] = incoming["value"]
+
+                # blue score
+                elif incoming["command"] == "bluescore-set":
+                    count["blue"] = incoming["value"]
+                elif incoming["command"] == "bluescore-up":
+                    count["blue"] = str(int(count["blue"]) + 1)
+                elif incoming["command"] == "bluescore-down":
+                    count["blue"] = str(int(count["blue"]) - 1)
+
+
+                # competition
+                elif incoming["command"] == "competition-set":
+                    count["competition"] = incoming["value"]
+
+
+                # contributor
+                elif incoming["command"] == "contributor-set":
+                    count["contributor"] = incoming["value"]
+
+
+
+                for client in clients:
+                    client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
+
+                with open("count.json", "wb") as count_file:
+                    count_file.write(json.dumps(count))
+            except:
+                traceback.print_exc()
+
+
+        elif incoming["message"] == "countdown":
+            if incoming["command"] == "timer-set":
+                print (countdown)
+                countdown = countdownClass("dog", int(incoming["minutes"]), int(incoming["seconds"]))
+                print (countdown)
 
 
         # elements = ("/" + message).split('/') # to maintain ajax compatibility
@@ -764,8 +819,11 @@ def countdownManager():
             except:
                 traceback.print_exc()
 
-            for client in clients:
-                client.write_message(json.dumps({"messagetype": "countdown", "timeLeft": timeLeft}))
+            try:
+                for client in clients:
+                    client.write_message(json.dumps({"messagetype": "countdown", "timeLeft": timeLeft}))
+            except:
+                traceback.print_exc()
 
 countdownManagerThread = Thread(target=countdownManager)
 countdownManagerThread.daemon = True
@@ -842,24 +900,28 @@ def turnOffLED(_relay):
 
 
 def buttonRequestHandler(team, points):
-    print ("OH HECK IT'S BLUE BUTTON A O'CLOCK")
-    count["blue"] += 1
+    print ("OH HECK IT'S " + team + " BUTTON O'CLOCK")
+    count[team] = str(int(count[team]) + points)
     print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
 
+    for client in clients:
+        client.write_message(json.dumps({"messagetype": "dogbutton", "count": count, "animation": team + "-up-" + str(points)}))
+
     try:
-        requests.get("http://10.0.0.4/attention")
+        if team == "red":
+            requests.get("http://10.0.0.5/attention")
+        elif team == "blue":
+            requests.get("http://10.0.0.4/attention")
     except Exception as e:
         traceback.print_exc(e)
-
-    for client in clients:
-        client.write_message(json.dumps({"messagetype": "dogbutton", "count": count}))
 
     with open("count.json", "wb") as count_file:
         count_file.write(json.dumps(count))
 
-    teamName = count["blueteam"]
-    score = count["blue"]
+    teamName = count[team + "team"]
+    score = count[team]
 
+    # TODO: could there be a more direct way than the script calling its own webserver?
     requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
     requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
 
@@ -879,26 +941,6 @@ def on_message(ws, message_json):
         requests.get("http://10.0.0.220:8081/videoplay/webm/alert-cheer-optimized.webm/noloop/theripper")
 
 
-
-        print ("test 1")
-        try:
-            print ("message: " + str(message))
-        except:
-            traceback.print_exc()
-
-        print ("test 2")
-        try:
-            print ("message[\"data\"]: " + str(message["data"]))
-        except:
-            traceback.print_exc()
-
-        print ("test 3")
-        try:
-            print ("message[\"data\"][\"message\"]: " + str(message["data"]["message"]))
-        except:
-            traceback.print_exc()
-
-        print ("test 4")
         try:
             messageInMessage = json.loads(message["data"]["message"])
             subscriberMessage = "Thanks for the bits, " + messageInMessage["user_name"] + "!"
@@ -906,7 +948,6 @@ def on_message(ws, message_json):
             traceback.print_exc()
             subscriberMessage = "Thanks for the bits!"
 
-        print ("test 5")
         try:
             messageInMessage = json.loads(message["data"]["message"].replace("\\", ""))
         except:
@@ -914,12 +955,12 @@ def on_message(ws, message_json):
 
         # {"type":"MESSAGE","data":{"topic":"channel-bits-events-v2.105293178","message":"{\"data\":{\"user_name\":\"misscocoderp\",\"channel_name\":\"nicksmadscience\",\"user_id\":\"91256946\",\"channel_id\":\"105293178\",\"time\":\"2020-09-01T19:22:28.308448802Z\",\"chat_message\":\"Cheer1 Cheer1 test\",\"bits_used\":2,\"total_bits_used\":2,\"is_anonymous\":false,\"context\":\"cheer\",\"badge_entitlement\":{\"new_version\":1,\"previous_version\":0}},\"version\":\"1.0\",\"message_type\":\"bits_event\",\"message_id\":\"44653b0f-e601-57ae-a89f-6eb0cfc972a8\"}"}}
 
-        if message_json.find(string.lower("Cheer100")) != -1:
-            print ("Cheer100 confirmed")
-            requests.get("http://10.0.0.4/attention")
-        elif message_json.find(string.lower("Cheer101")) != -1:
-            print ("Cheer101 confirmed")
-            requests.get("http://10.0.0.5/attention")
+        # if message_json.find(string.lower("Cheer100 red")) != -1 or message_json.find(string.lower("Butts100 red")) != -1:
+        #     print ("red cheer confirmed")
+        #     buttonRequestHandler("red", 5)
+        # if message_json.find(string.lower("Cheer100 blue")) != -1 or message_json.find(string.lower("Butts100 blue")) != -1:
+        #     print ("blue cheer confirmed")
+        #     buttonRequestHandler("blue", 5)
         else:
             print ("No bit alerts found")
 
@@ -1008,48 +1049,11 @@ def on_message(ws, message_json):
         # eventHandler("new subscriber", "subscriber name")
 
     elif message_json.find("1f1bc054-a48f-418b-b148-bfe14580bb4b") != -1:
-        print ("OH HECK IT'S BLUE BUTTON A O'CLOCK")
-        count["blue"] += 1
-        print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
-        try:
-            requests.get("http://10.0.0.4/attention")
-        except Exception as e:
-            traceback.print_exc(e)
-
-        for client in clients:
-            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count, "animation": "blue-up-1"}))
-
-        with open("count.json", "wb") as count_file:
-            count_file.write(json.dumps(count))
-
-        teamName = count["blueteam"]
-        score = count["blue"]
-
-        # requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
-        requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
-
+        buttonRequestHandler("blue", 1)
 
     elif message_json.find("a015be4f-c7ff-4a27-b519-414a4afc02a1") != -1:
-        print ("OH HECK IT'S RED BUTTON B O'CLOCK")
-        count["red"] += 1
-        print ("blue: " + str(count["blue"]) + "  red: " + str(count["red"]))
-        try:
-            requests.get("http://10.0.0.5/attention")
-        except Exception as e:
-            traceback.print_exc(e)
+        buttonRequestHandler("red", 1)
 
-        for client in clients:
-            client.write_message(json.dumps({"messagetype": "dogbutton", "count": count, "animation": "red-up-1"}))
-
-        with open("count.json", "wb") as count_file:
-            count_file.write(json.dumps(count))
-
-        teamName = count["redteam"]
-        score = count["red"]
-
-        # TODO: could there be a more direct way than the script calling its own webserver?
-        # requests.get("http://10.0.0.220:8081/titleplay/nms-giant-scoreboard.html/{\"teamNameUpdater\": \"" + teamName + "\", \"scoreUpdater\": \"" + str(score) + "\"}/nc1in")
-        requests.get("http://10.0.0.220:8081/videoplay/webm/blur-and-lightning.webm/noloop/nc1in")
 
     elif message_json.find("fe92a417-adf0-4137-980d-22245819c6f5") != -1:
         print ("OH HECK IT'S FEED THAT PUP O'CLOCK")
@@ -1192,7 +1196,14 @@ while go:
 
                 if message[0:5].lower() == "cheer" or message[0:5].lower() == "corgo" or message[0:5] == "Butts":
                     print ("OMFG CHEER")
+                    print (message)
                     # Don't actually need to handle this here because I've got PubSub
+                    # update: yeah except i need testing
+
+                    if message.find("red") != -1:
+                        buttonRequestHandler("red", 5)
+                    elif message.find("blue") != -1:
+                        buttonRequestHandler("blue", 5)
 
 
                 # TODO: obviously, screen to make sure this is coming from an authorized account
