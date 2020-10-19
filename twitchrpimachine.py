@@ -530,6 +530,20 @@ def requestHandler_dog_button_red(get):
         return "text/plain", OK
 
 
+def requestHandler_background(get):
+    global clients
+
+    try:
+        for client in clients:
+            client.write_message(json.dumps({"messagetype": "background", "left": get[2], "right": get[3], "lower": get[4], "blur": get[5], "mixblendmode": get[6]}))
+
+        return "OK"
+    except Exception as e:
+        return "text/plain", traceback.print_exc(e)
+    else:
+        return "text/plain", OK
+
+
 
 
 
@@ -553,6 +567,7 @@ httpRequests = {'': requestHandler_index,
                 'marquee': requestHandler_marquee,
                 'titleplay': requestHandler_titlePlay,
                 'videoplay': requestHandler_videoPlay,
+                'background': requestHandler_background,
                 'resetdogcounter': requestHandler_resetDogCounter,
                 'spookymode': requestHandler_spookymode,
                 'notspookymode': requestHandler_notspookymode,
@@ -713,9 +728,63 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
         elif incoming["message"] == "countdown":
             if incoming["command"] == "timer-set":
-                print (countdown)
                 countdown = countdownClass("dog", int(incoming["minutes"]), int(incoming["seconds"]))
-                print (countdown)
+
+
+        elif incoming["message"] == "animation":
+            for client in clients:
+                client.write_message(json.dumps({"messagetype": "animation", "value": incoming["value"]}))
+
+        # else:
+        #     print ("no match; forwarding")
+        #     for client in clients:
+        #         client.write_message(json.dumps(incoming))
+
+        elif incoming["message"] == "videoplay":
+            for client in clients:
+                try:
+                    client.write_message(json.dumps({"messagetype": "videoplay",
+                                                    "type": incoming["type"],
+                                                    "url": incoming["url"],
+                                                    "looping": incoming["looping"],
+                                                    "instance": incoming["instance"],
+                                                    }))
+                except:
+                    traceback.print_exc()
+
+        elif incoming["message"] == "background":
+            for client in clients:
+                try:
+                    client.write_message(json.dumps({"messagetype": "background",
+                                                    "left": incoming["left"],
+                                                    "right": incoming["right"],
+                                                    "lower": incoming["lower"],
+                                                    "blur": incoming["blur"],
+                                                    "mixblendmode": incoming["mixblendmode"],
+
+                    }))
+                except:
+                    traceback.print_exc()
+
+        elif incoming["message"] == "lightingpreset":
+            for client in clients:
+                try:
+                    client.write_message(json.dumps({"messagetype": "lightingpreset",
+                                                    "preset": incoming["preset"],
+                                                    }))
+                except:
+                    traceback.print_exc()
+
+
+        elif incoming["message"] == "lightingset":
+            for client in clients:
+                client.write_message(json.dumps({"messagetype": "lightingset",
+                                                 "channel": incoming["channel"],
+                                                 "value": incoming["value"],
+                                                 }))
+
+
+
 
 
         # elements = ("/" + message).split('/') # to maintain ajax compatibility
@@ -819,11 +888,12 @@ def countdownManager():
             except:
                 traceback.print_exc()
 
-            try:
-                for client in clients:
+            
+            for client in clients:
+                try:
                     client.write_message(json.dumps({"messagetype": "countdown", "timeLeft": timeLeft}))
-            except:
-                traceback.print_exc()
+                except:
+                    traceback.print_exc()
 
 countdownManagerThread = Thread(target=countdownManager)
 countdownManagerThread.daemon = True
@@ -998,14 +1068,17 @@ def on_message(ws, message_json):
     elif message_json.find("09f2fb67-e75c-4230-b131-3d87624f91ef") != -1:
         print ("OH HECK IT'S GREEN LIGHTING O'CLOCK")
         requests.get("http://10.0.0.44:8081/preset/nms")
+        requests.get("http://10.0.0.220:8081/background/44cc33/44ff99/bb4400/5px/overlay")
 
     elif message_json.find("5c0415aa-c34b-4406-9bbd-716d2234c8df") != -1:
         print ("OH HECK IT'S RED LIGHTING O'CLOCK")
         requests.get("http://10.0.0.44:8081/preset/red")
+        requests.get("http://10.0.0.220:8081/background/ff3388/bb4433/bb2200/5px/overlay")
 
     elif message_json.find("fc223bd0-bf21-4282-9f8e-c48f129de97f") != -1:
         print ("OH HECK IT'S BLUE LIGHTING O'CLOCK")
         requests.get("http://10.0.0.44:8081/preset/fyv")
+        requests.get("http://10.0.0.220:8081/background/0088ff/440088/bb4400/5px/overlay")
 
     elif message_json.find("3b3a4e59-f111-4ff7-8dfc-494a95b0c883") != -1:
         print ("OH HECK IT'S TOTD LIGHTING O'CLOCK")
@@ -1202,8 +1275,10 @@ while go:
 
                     if message.find("red") != -1:
                         buttonRequestHandler("red", 5)
+                        requests.get("http://10.0.0.220:8081/background/ff3388/bb4433/bb2200/5px/overlay")
                     elif message.find("blue") != -1:
                         buttonRequestHandler("blue", 5)
+                        requests.get("http://10.0.0.220:8081/background/0088ff/440088/bb4400/5px/overlay")
 
 
                 # TODO: obviously, screen to make sure this is coming from an authorized account
