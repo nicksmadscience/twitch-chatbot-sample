@@ -77,7 +77,7 @@ while True:
 				elif msg.note == 27:
 					wsSendWithTry(json.dumps({'message': 'background', 'left': '888888', 'right': '888888', 'lower': '888888', 'blur': '0px', 'mixblendmode': 'overlay'}))
 				elif msg.note == 28:
-					wsSendWithTry(json.dumps({'message': 'background', 'left': 'ff0088', 'right': '888888', 'lower': '888888', 'blur': '0px', 'mixblendmode': 'overlay'}))
+					wsSendWithTry(json.dumps({'message': 'background', 'left': 'bb0088', 'right': '88bb00', 'lower': '0088bb', 'blur': '0px', 'mixblendmode': 'overlay'}))
 				elif msg.note == 29:
 					wsSendWithTry(json.dumps({'message': 'background', 'left': '888888', 'right': '888888', 'lower': '888888', 'blur': '0px', 'mixblendmode': 'overlay'}))
 				elif msg.note == 30:
@@ -96,9 +96,15 @@ while True:
 					wsSendWithTry(json.dumps({'message': 'lightingset', 'channel': '34', 'value': '255'}))
 
 
+
+				elif msg.note == 120:
+					wsSendWithTry(json.dumps({'message': 'pulse'}))
+
+
 			elif msg.type == "note_off":
 				if msg.note == 60:
 					wsSendWithTry(json.dumps({'message': 'lightingset', 'channel': '34', 'value': '0'}))
+
 
 
 			elif msg.type == "control_change":
