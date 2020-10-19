@@ -783,6 +783,10 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                                                  "value": incoming["value"],
                                                  }))
 
+        elif incoming["message"] == "pulse":
+            for client in clients:
+                client.write_message(json.dumps({"messagetype": "pulse"})
+
 
 
 
