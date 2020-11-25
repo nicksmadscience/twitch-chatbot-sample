@@ -161,6 +161,20 @@ function newWebsocket()
 	        	fullscreenvideoplayer.play();
 	        }
 	    }
+		else if (messageType == "pulse")
+		{
+			var titleholder = document.getElementById("titleholder");
+
+			try
+			{
+				titleholder.contentWindow.eval("pulse()");
+			}
+			catch (err)
+			{
+				
+			}
+			
+		}
     }
 }
 

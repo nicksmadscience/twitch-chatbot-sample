@@ -274,6 +274,21 @@ window.onload = function()
 	});
 
 
+
+	// final countdown
+
+	document.getElementById("finalcountdown-in").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "animation", "value": "finalcountdown-in"});
+	});
+
+
+
+	document.getElementById("finalcountdown-out").addEventListener("click", function() {
+		sendWebsocketSetting({"message": "animation", "value": "finalcountdown-out"});
+	});
+
+
+
 }
 
 
@@ -359,6 +374,15 @@ window.onload = function()
 
 				<button id="contributor-set">Set</button>
 			</div>
+		</div>
+
+		<div class="scoreboard-section">
+			<div class="scoreboard-subsection">
+				<label for="finalcountdown-in">Final Countdown</label>
+				<button id="finalcountdown-in">In</button>
+				<button id="finalcountdown-out">Out</button>
+			</div>
+		</div>
 	</body>
 </html>
 

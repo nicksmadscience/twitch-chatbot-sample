@@ -8,6 +8,7 @@
 		<script type="text/javascript">
 
 
+
 function oneShotPlayAnimation(_elementName, _className, _expiration)
 {
 	var element = document.getElementById(_elementName)
@@ -98,7 +99,29 @@ function newWebsocket()
 								  oneShotPlayAnimation("floatypoints-blue", "scoreboard-floatypoints-five-animation", 6000);
 								  stupidJavaScriptAnimationFiver("floatypoints-blue");
 								  break;
+								
 				default: break;
+			}
+
+		}
+		else if (messageType == "animation")
+		{
+			switch (websocketMessage_array["value"])
+			{
+				case "finalcountdown-in": document.getElementById("bigmessage").innerHTML = "FINAL COUNTDOWN";
+					document.getElementById("bigmessage-container").classList.add("bigmessage-container-enterscreen");
+					break;
+
+				case "finalcountdown-out": document.getElementById("bigmessage-container").classList.add("bigmessage-container-leavescreen");
+					setTimeout(function() {
+						document.getElementById("bigmessage-container").classList.remove("bigmessage-container-enterscreen");
+						document.getElementById("bigmessage-container").classList.remove("bigmessage-container-leavescreen");
+					}, 2000);
+					
+					break;
+
+				default: break;
+									
 			}
 	    }
 	    else if (messageType == "countdown")
@@ -117,7 +140,9 @@ function newWebsocket()
 
 window.onload = function()
 {
-    newWebsocket();
+	newWebsocket();
+	
+
 }
 
 
@@ -552,6 +577,121 @@ body
 
 
 
+.bigmessage
+{
+	background-color: #200;
+	color: rgb(255, 64, 64);
+
+	font-family: "VT323";
+	font-size: 80px;
+	text-align: center;
+	border: 3px solid #400;
+	border-radius: 10px;
+	/* transform: scale(2.5); */
+
+	animation-name: bigpulse;
+	animation-duration: 0.7s;
+	animation-iteration-count: infinite;
+	animation-fill-mode: forwards;
+}
+
+
+@keyframes bigpulse
+{
+	0%
+	{
+		color: red;
+	}
+	30%
+	{
+		color: rgb(255, 64, 64);
+	}
+	50%
+	{
+		color: white;
+	}
+	70%
+	{
+		color: rgb(255, 64, 64);
+	}
+	100%
+	{
+		color: red;
+	}
+}
+
+
+.bigmessage-container
+{
+	position: absolute;
+	bottom: 435px;
+	left: 725px;
+	z-index: -500;
+	width: 570px;
+	height: 85px;
+
+	animation-name: bigmessagecontainerintro;
+	animation-duration: 5s;
+	animation-iteration-count: 1;
+	animation-fill-mode: forwards;
+	animation-play-state: paused;
+
+	transition: all 1s;
+}
+
+.bigmessage-container-enterscreen
+{
+	animation-play-state: running !important;
+}
+
+
+.bigmessage-container-leavescreen
+{
+	animation-name: bigmessagecontaineroutro;
+	animation-duration: 2s;
+}
+
+
+@keyframes bigmessagecontainerintro
+{
+	0%
+	{
+		transform: translateY(600px) scale(2.5);
+	}
+	20%
+	{
+		transform: translateY(-400px) scale(2.5);
+	}
+	70%
+	{
+		transform: translateY(-400px) scale(2.5);
+	}
+	100%
+	{
+		transform: translateY(0) scale(1.0);
+	}
+}
+
+@keyframes bigmessagecontaineroutro
+{
+	0%
+	{
+		transform: translateY(0) scale(1.0);
+	}
+	80%
+	{
+		transform: translateY(100px) scale(1.0);
+		opacity: 1.0;
+	}
+	100%
+	{
+		transform: translateY(100px) scale(1.0);
+		opacity: 0.0;
+	}
+}
+
+
+
 		</style>
 	</head>
 	<body>
@@ -584,5 +724,11 @@ body
 				<div class="scoreboard-bigmarquee scoreboard-bigmarquee-bottom" id="contributor">Suggested by me</div>
 			</div>
 		</div>
+		<div class="bigmessage-container" id="bigmessage-container">
+			<div class="bigmessage" id="bigmessage">
+				FINAL COUNTDOWN
+			</div>
+		</div>
+		</body>
 	</body>
 </html> 

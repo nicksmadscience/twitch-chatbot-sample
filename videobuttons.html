@@ -1,0 +1,168 @@
+<html>
+    <head>
+        <link href="halloweenserver-style.css" type="text/css" rel="stylesheet">
+        <script type="text/javascript">
+        
+function sendWebsocketSetting(tosend_object)
+{
+	var toSend = JSON.stringify(tosend_object);
+	console.log(toSend);
+	s.send(toSend);
+}
+
+
+function newWebsocket()
+{
+    console.log("new websocket");
+    s = new WebSocket("ws://10.0.0.220:6789/ws");
+
+    s.onopen = function(e)
+    {
+        console.log("opened");
+    }
+    
+    s.onclose = function(e)
+    {
+        console.log("closed");
+
+        setTimeout(function() { newWebsocket(); }, 3000);
+    }
+    
+    s.onmessage = function(e)
+    {
+        console.log(e.data);
+
+        var websocketMessage_array = JSON.parse(e.data);
+
+        var messageType = websocketMessage_array["messagetype"];
+
+
+	    if (messageType == "placeholder")
+	    {
+            
+        }
+    }
+}
+
+
+
+window.onload = function()
+{
+    newWebsocket();
+}
+        
+        </script>
+    </head>
+    <body>
+        <div class="buttons-group">
+            <div class="clipcategoryheader">Background Media</div>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1912008_hauntedNight_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Haunted Night</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1504908_fullMoonNight_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Full Moon Night</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '24034_graveyardShift_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Graveyard Shift</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1348496_chargedElectricity_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Charged Electricity</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1760465_stormClouds_HD.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Storm Clouds</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '24014_hauntedHouse_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Haunted House</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '24549_bonfireWind_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Bonfire Wind</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '24022_howlingMoon_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Howling Moon</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1370712_endlessHaunt_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Endless Haunt</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1370964_spookySight_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Spooky Sight</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1370762_scaryScratch_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Scary Scratch</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1371023_onTheOtherSide_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">On The Other Side</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1371028_walkWithJack_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Walk With Jack</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1371019_moonlitSwamp_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Moonlit Swamp</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1371007_starryGraves_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Starry Graves</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1370895_oldGraves_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Old Graves</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1442200_maybeZombies_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Maybe Zombies</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1748089_forestOfTheNight_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Forest of The Night</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1748090_forestWhispers_HD_BG.mp4', 'looping': 'looping', 'instance': 'background', 'type': 'mp4'})">Forest Whispers</button>
+            <button class="clipbutton buttons-category1" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': '1911310_wheresTheReaper_HD_BG.mov', 'looping': 'looping', 'instance': 'background', 'type': 'mov'})">Where's The Reaper?</button>
+        </div>
+        <div class="buttons-group">
+            <div class="clipcategoryheader">Overlay Layer - Light</div>
+            <button class="clipbutton buttons-category2" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'the-tumbler.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">The Tumbler</button>
+            <button class="clipbutton buttons-category2" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'sharp-leaks.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Sharp Leaks</button>
+            <button class="clipbutton buttons-category2" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'pink-light-leak.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Pink Light Leak</button>
+            <button class="clipbutton buttons-category2" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'light-bars.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Light Bars</button>
+            <button class="clipbutton buttons-category2" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'lava-lamp.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Lava Lamp</button>
+            <button class="clipbutton buttons-category2" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'fractal-blur.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Fractal Blur</button>
+            <button class="clipbutton buttons-category2" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'color-wash.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Color Wash</button>
+        </div>
+        <div class="buttons-group">
+            <div class="clipcategoryheader">Overlay Layer - Hand Drawn</div>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'white-grit.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">White Grit</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'thrown-paint.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Thrown Paint</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'soft-texture.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Soft Texture</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'soft-chalk-blooms.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Soft Chalk Blooms</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'sharp-grit.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Sharp Grit</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'scribble-bar.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Scribble Bar</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'rats-nest.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Rat's Nest</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'pink-ink.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Pink Ink</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'ink-splatter.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Ink Splatter</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'ink-drops-slow.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Ink Drops Slow</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'grunge-scribbles-slow.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Grunge Scribbles Slow</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'grunge-scribbles-fast.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Grunge Scribbles Fast</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'geo-nest.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Geo Nest</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'geo-nest-full.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Geo Nest Full</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'geo-nest-full-green.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Geo Nest Full Green</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'crosshatch.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Crosshatch</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'charcoal-bar.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Charcoal Bar</button>
+            <button class="clipbutton buttons-category3" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'charcoal-bar-streaked.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Charcoal Bar Streaked</button>
+        </div>
+        <div class="buttons-group">
+            <div class="clipcategoryheader">Overlay Layer - Distortion</div>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'contrast-glitch.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Contrast Glitch</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'ripple-glitch.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Ripple Glitch</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'ASCII.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">ASCII</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'pop-line.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Pop Line</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'signal-glitch.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Signal Glitch</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'glitch-squares.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Glitch Squares</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'spin-cycle.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Spin Cycle</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'bad-ega.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Bad EGA</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'string-theory.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">String Theory</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'red-glitch-vertical.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Red Glitch Vertical</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'red-glitch.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Red Glitch</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'broken-monitor.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Broken Monitor</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'hot-glitching.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Hot Glitching</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'pinky-and-the-grain.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Pinky and The Grain</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'blank-VHS.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Blank VHS</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'classic-static.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Classic Static</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'distort-lines.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Distort Lines</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'frenzy-box.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Frenzy Box</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'rain-drain.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Rain Brain</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'center-glitch.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Center Glitch</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'broken-monitor-pixels.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Broken Monitor Pixels</button>
+            <button class="clipbutton buttons-category4" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'pretty-glitchy.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Pretty Glitchy</button>
+        </div>
+        <div class="buttons-group">
+            <div class="clipcategoryheader">Overlay Layer - Elements</div>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'chinese-bar.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Chinese Bar</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'LED-waves.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">LED Waves</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'x-and-o-small.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">X and O Small</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'radial-bloom.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Radial Bloom</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'expanding-circles-60fps.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Expanding Circles 60fps</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'stripes-60fps.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Stripes 60fps</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'geo-spark.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Geo Spark</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'crisp-lines.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Crisp Lines</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'expanding-squares-60fps.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Expanding Squares 60fps</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'spiral-dream.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Spiral Dream</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'broken-bloom.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Broken Bloom</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'banner.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Banner</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'wavy-lines.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Wavy Lines</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'guilty-lightning.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Guilty Lightning</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'frayed-threads.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Frayed Threads</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'line-web.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Line Web</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'x-and-o-big.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">X and O Big</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'large-blocks.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Large Blocks</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'the-grid.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">The Grid</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'glitch-cross.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Glitch Cross</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'small-blocks.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Small Blocks</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'guilty-spark.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Guilty Spark</button>
+            <button class="clipbutton buttons-category5" onmousedown="sendWebsocketSetting({'message': 'videoplay', 'url': 'painted-vortex.mp4', 'looping': 'looping', 'instance': 'overlay', 'type': 'mp4'})">Painted Vortex</button>
+        </div>
+        <div class="buttons-group">
+            <div class="clipcategoryheader">Background Colors</div>
+            <button class="clipbutton buttons-category6" onmousedown="sendWebsocketSetting({'message': 'background', 'left': '602749', 'right': 'B16243', 'lower': 'F6921D', 'blur': '2px', 'mixblendmode': 'multiply'})">Trick or Treat</button>
+            <button class="clipbutton buttons-category6" onmousedown="sendWebsocketSetting({'message': 'background', 'left': '8A0116', 'right': 'DE3F33', 'lower': 'DEB314', 'blur': '2px', 'mixblendmode': 'overlay'})">Candy Corn</button>
+        </div>
+    </body>
+</html>

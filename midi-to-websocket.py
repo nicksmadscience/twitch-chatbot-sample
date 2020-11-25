@@ -10,41 +10,81 @@ print(mido.get_input_names())
 
 
 
+# import websocket
+# try:
+# 	import thread
+# except ImportError:
+# 	import _thread as thread
+# import time
+
+# def on_message(ws, message):
+# 	print(message)
+
+# def on_error(ws, error):
+# 	print(error)
+
+# def on_close(ws):
+# 	print("### closed ###")
+
+# def on_open(ws):
+# 	print ("### open ###")
+
+
+# websocket.enableTrace(True)
+# ws = websocket.WebSocketApp("ws://10.0.0.220:6789/ws",
+# 							on_message = on_message,
+# 							on_error = on_error,
+# 							on_close = on_close)
+# ws.on_open = on_open
+
+# def websocketRunner():
+# 	global ws
+# 	ws.run_forever()
+
+
+# websocketRunnerThread = Thread(target=websocketRunner)
+# websocketRunnerThread.daemon = True
+# websocketRunnerThread.start()
+
+
+
 import websocket
-try:
-	import thread
-except ImportError:
-	import _thread as thread
-import time
+import threading, time
+
+def on_close(ws):
+    # print('disconnected from server')
+    print ("Retry : %s" % time.ctime())
+    time.sleep(3)
+    connect_websocket() # retry per 3 seconds
+
+def on_open(ws):
+    print('connection established')
 
 def on_message(ws, message):
 	print(message)
 
-def on_error(ws, error):
-	print(error)
+ws = False
 
-def on_close(ws):
-	print("### closed ###")
+def connect_websocket():
+    global ws
 
-def on_open(ws):
-	print ("### open ###")
+    ws = websocket.WebSocketApp("ws://10.0.0.220:6789/ws", on_open = on_open, on_close = on_close, on_message = on_message)
+    wst = threading.Thread(target=ws.run_forever)
+    wst.daemon = True
+    wst.start()
 
-
-websocket.enableTrace(True)
-ws = websocket.WebSocketApp("ws://10.0.0.220:6789/ws",
-							on_message = on_message,
-							on_error = on_error,
-							on_close = on_close)
-ws.on_open = on_open
-
-def websocketRunner():
-	global ws
-	ws.run_forever()
+if __name__ == "__main__":
+    try:
+        connect_websocket()
+    except Exception as err:
+        print(err)
+        print("connect failed")
 
 
-websocketRunnerThread = Thread(target=websocketRunner)
-websocketRunnerThread.daemon = True
-websocketRunnerThread.start()
+
+
+
+
 
 def wsSendWithTry(toSend):
 	global ws
@@ -79,11 +119,11 @@ while True:
 				elif msg.note == 28:
 					wsSendWithTry(json.dumps({'message': 'background', 'left': 'bb0088', 'right': '88bb00', 'lower': '0088bb', 'blur': '0px', 'mixblendmode': 'overlay'}))
 				elif msg.note == 29:
-					wsSendWithTry(json.dumps({'message': 'background', 'left': '888888', 'right': '888888', 'lower': '888888', 'blur': '0px', 'mixblendmode': 'overlay'}))
+					wsSendWithTry(json.dumps({'message': 'background', 'left': '32a8c4', 'right': '00c176', 'lower': 'f5e2ab', 'blur': '0px', 'mixblendmode': 'overlay'}))
 				elif msg.note == 30:
-					wsSendWithTry(json.dumps({'message': 'background', 'left': '888888', 'right': '888888', 'lower': '888888', 'blur': '0px', 'mixblendmode': 'overlay'}))
+					wsSendWithTry(json.dumps({'message': 'background', 'left': 'e984e9', 'right': 'f99c09', 'lower': '7c71c9', 'blur': '0px', 'mixblendmode': 'overlay'}))
 				elif msg.note == 31:
-					wsSendWithTry(json.dumps({'message': 'background', 'left': '888888', 'right': '888888', 'lower': '888888', 'blur': '0px', 'mixblendmode': 'overlay'}))
+					wsSendWithTry(json.dumps({'message': 'background', 'left': 'f17008', 'right': 'f19c08', 'lower': 'f1c808', 'blur': '0px', 'mixblendmode': 'overlay'}))
 
 				elif msg.note == 48:
 					wsSendWithTry(json.dumps({'message': 'lightingpreset', 'preset': 'red-only'}))
